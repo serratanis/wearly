@@ -35,9 +35,7 @@ class StyleAssistantViewModel(
     private val _forecast = MutableStateFlow<LoadState<Forecast>>(LoadState.Loading)
     val forecast: StateFlow<LoadState<Forecast>> = _forecast.asStateFlow()
 
-    private val _messages = MutableStateFlow(
-        listOf(StyleMessage("Bugünkü planını anlat; gerçek hava durumuna uygun bir kombin hazırlayayım.", false))
-    )
+    private val _messages = MutableStateFlow(listOf(WELCOME_MESSAGE))
     val messages: StateFlow<List<StyleMessage>> = _messages.asStateFlow()
 
     private val _latestOutfit = MutableStateFlow<OutfitRecommendation?>(null)
@@ -45,6 +43,15 @@ class StyleAssistantViewModel(
 
     init {
         load()
+    }
+
+    fun restoreMessages(savedMessages: List<StyleMessage>) {
+        if (savedMessages.isNotEmpty()) _messages.value = savedMessages
+    }
+
+    fun clearConversation() {
+        _latestOutfit.value = null
+        _messages.value = listOf(WELCOME_MESSAGE)
     }
 
     fun send(text: String, wardrobe: List<WardrobeItem> = emptyList(), settings: UserSettings = UserSettings()) {
@@ -92,6 +99,8 @@ class StyleAssistantViewModel(
     }
 
     companion object {
+        private val WELCOME_MESSAGE =
+            StyleMessage("Bugünkü planını anlat; gerçek hava durumuna uygun bir kombin hazırlayayım.", false)
         private const val TAG = "StyleAssistant"
         const val ARG_NAME = "styleName"
         const val ARG_LATITUDE = "styleLatitude"

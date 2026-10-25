@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kampplus.hava.data.ChatHistoryStore
 import com.kampplus.hava.data.WardrobeStore
 import com.kampplus.hava.model.OutfitRecommendation
 import com.kampplus.hava.model.StyleMessage
@@ -60,16 +63,27 @@ fun StyleAssistantRoute(
 ) {
     val context = LocalContext.current
     val wardrobeStore = remember(context) { WardrobeStore(context.applicationContext) }
+    val historyStore = remember(context) { ChatHistoryStore(context.applicationContext) }
     val wardrobe by wardrobeStore.items.collectAsStateWithLifecycle()
     val forecast by viewModel.forecast.collectAsStateWithLifecycle()
     val messages by viewModel.messages.collectAsStateWithLifecycle()
     val latestOutfit by viewModel.latestOutfit.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel.cityName) {
+        viewModel.restoreMessages(historyStore.messagesFor(viewModel.cityName))
+    }
     StyleAssistantScreen(
         cityName = viewModel.cityName,
         forecastState = forecast,
         messages = messages,
         latestOutfit = latestOutfit,
-        onSend = { viewModel.send(it, wardrobe, settings) },
+        onSend = {
+            viewModel.send(it, wardrobe, settings)
+            historyStore.replace(viewModel.cityName, viewModel.messages.value)
+        },
+        onClearConversation = {
+            viewModel.clearConversation()
+            historyStore.clear(viewModel.cityName)
+        },
         onBack = onBack,
         modifier = modifier
     )
@@ -83,6 +97,7 @@ private fun StyleAssistantScreen(
     messages: List<StyleMessage>,
     latestOutfit: OutfitRecommendation?,
     onSend: (String) -> Unit,
+    onClearConversation: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -105,6 +120,11 @@ private fun StyleAssistantScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onClearConversation) {
+                        Icon(Icons.Default.Delete, contentDescription = "Yeni sohbet başlat")
                     }
                 }
             )
