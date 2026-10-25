@@ -13,6 +13,9 @@
     "weather_code": [2, 3],
     "temperature_2m_max": [18.1, 20.1],
     "temperature_2m_min": [9.0, 6.2],
-    "precipitation_probability_max": [0, 10]
+    "precipitation_probability_max": [0, 10],
+    "sunrise": ["2026-09-24T06:39", "2026-09-25T06:40"],
+    "sunset": ["2026-09-24T18:45", "2026-09-25T18:43"],
+    "uv_index_max": [5.2, 4.8]
   }
 }

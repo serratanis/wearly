@@ -1,5 +1,6 @@
 package com.kampplus.hava.ui.city
 
+import com.kampplus.hava.model.SearchScope
 import com.kampplus.hava.testing.FakeCityRepository
 import com.kampplus.hava.testing.MainDispatcherRule
 import com.kampplus.hava.testing.sampleCity
@@ -127,6 +128,20 @@ class CityViewModelTest {
         advanceUntilIdle()
 
         assertEquals("Rize", repository.lastQuery)
+        assertEquals(SearchScope.TURKEY, repository.lastScope)
+    }
+
+    @Test
+    fun `dunya secilince arama kapsamiyla birlikte yenilenir`() = runTest {
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onScopeChange(SearchScope.WORLD)
+        advanceUntilIdle()
+
+        assertEquals(SearchScope.WORLD, viewModel.scope.value)
+        assertEquals(SearchScope.WORLD, repository.lastScope)
+        assertEquals(2, repository.callCount)
     }
 
     @Test

@@ -7,6 +7,7 @@ import com.google.gson.JsonSyntaxException
 import com.kampplus.hava.data.CityRepository
 import com.kampplus.hava.data.OpenMeteoCityRepository
 import com.kampplus.hava.model.City
+import com.kampplus.hava.model.SearchScope
 import com.kampplus.hava.ui.LoadState
 import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,9 @@ class CityViewModel(
     private val _uiState = MutableStateFlow<LoadState<List<City>>>(LoadState.Loading)
     val uiState: StateFlow<LoadState<List<City>>> = _uiState.asStateFlow()
 
+    private val _scope = MutableStateFlow(SearchScope.TURKEY)
+    val scope: StateFlow<SearchScope> = _scope.asStateFlow()
+
     init {
         // Ekran boş açılmasın diye açılışta bir arama yapılır.
         search()
@@ -50,6 +54,12 @@ class CityViewModel(
     /** Kullanıcı arama kutusuna her harf yazdığında çağrılır. */
     fun onQueryChange(newQuery: String) {
         _query.value = newQuery
+    }
+
+    fun onScopeChange(newScope: SearchScope) {
+        if (_scope.value == newScope) return
+        _scope.value = newScope
+        search()
     }
 
     /**
@@ -62,7 +72,7 @@ class CityViewModel(
         viewModelScope.launch {
             _uiState.value = LoadState.Loading
             _uiState.value = try {
-                val cities = repository.search(_query.value)
+                val cities = repository.search(_query.value, _scope.value)
                 // Cevap geldi ama içi boş: bu bir hata değil, "Empty" durumudur.
                 if (cities.isEmpty()) LoadState.Empty else LoadState.Success(cities)
             } catch (e: IOException) {

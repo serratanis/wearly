@@ -50,6 +50,9 @@ class CityApiTest {
         assertEquals("DE", berlin.countryCode)
         assertEquals("Almanya", berlin.country)
         assertEquals("Berlin", berlin.admin1)
+        assertEquals("PPLC", berlin.featureCode)
+        assertEquals(3426354L, berlin.population)
+        assertEquals("Europe/Berlin", berlin.timezone)
     }
 
     @Test
@@ -69,8 +72,8 @@ class CityApiTest {
 
         val berlin = checkNotNull(api.search("Berlin").results).first()
 
-        // admin1 ve country aynı olduğunda tekrar yazılmaz: "Berlin" (", Almanya" eklenir).
-        assertEquals("Berlin, Almanya", berlin.subtitle)
+        // Şehir adı ile admin1 aynıysa gereksiz tekrar yapılmaz.
+        assertEquals("Almanya", berlin.subtitle)
     }
 
     @Test
@@ -95,7 +98,16 @@ class CityApiTest {
         val path = checkNotNull(request.path)
         assertTrue("Yol v1/search olmali: $path", path.startsWith("/v1/search"))
         assertTrue("name parametresi eksik: $path", path.contains("name=Ankara"))
-        assertTrue("count varsayilani 10 olmali: $path", path.contains("count=10"))
+        assertTrue("count varsayilani 20 olmali: $path", path.contains("count=20"))
         assertTrue("language varsayilani tr olmali: $path", path.contains("language=tr"))
+    }
+
+    @Test
+    fun `ulke filtresi countryCode parametresi olarak gonderilir`() = runTest {
+        server.enqueue(MockResponse().setBody(readResource("geocoding_berlin.json")))
+
+        api.search(name = "Ankara", countryCode = "TR")
+
+        assertTrue(checkNotNull(server.takeRequest().path).contains("countryCode=TR"))
     }
 }

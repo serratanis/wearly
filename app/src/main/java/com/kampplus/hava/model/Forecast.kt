@@ -42,5 +42,8 @@ data class DailyForecast(
     val minTemperatureC: Double,
     val maxTemperatureC: Double,
     val weatherCode: Int,
-    val precipitationProbability: Int? = null
+    val precipitationProbability: Int? = null,
+    val sunrise: LocalDateTime? = null,
+    val sunset: LocalDateTime? = null,
+    val uvIndexMax: Double? = null
 )

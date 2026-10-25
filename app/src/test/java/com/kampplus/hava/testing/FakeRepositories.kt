@@ -5,6 +5,7 @@ import com.kampplus.hava.data.WeatherRepository
 import com.kampplus.hava.model.City
 import com.kampplus.hava.model.CurrentWeather
 import com.kampplus.hava.model.Forecast
+import com.kampplus.hava.model.SearchScope
 import java.time.LocalDateTime
 
 /**
@@ -28,12 +29,16 @@ class FakeCityRepository(
     var lastQuery: String? = null
         private set
 
+    var lastScope: SearchScope? = null
+        private set
+
     /** Kaç kez arama yapıldığı; "Tekrar dene" davranışını doğrulamak için. */
     var callCount: Int = 0
         private set
 
-    override suspend fun search(query: String): List<City> {
+    override suspend fun search(query: String, scope: SearchScope): List<City> {
         lastQuery = query
+        lastScope = scope
         callCount++
         error?.let { throw it }
         return result

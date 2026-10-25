@@ -25,11 +25,13 @@ interface CityApi {
      * @param count Kaç sonuç istendiği. Varsayılan değerler sayesinde çağrı tarafı
      *   tek parametreyle `search("Ankara")` yazabilir.
      * @param language Sonuçların dili; Türkçe isimler için "tr".
+     * @param countryCode Doluysa sonuçları ISO ülke koduna göre kesin olarak süzer.
      */
     @GET("v1/search")
     suspend fun search(
         @Query("name") name: String,
-        @Query("count") count: Int = 10,
-        @Query("language") language: String = "tr"
+        @Query("count") count: Int = 20,
+        @Query("language") language: String = "tr",
+        @Query("countryCode") countryCode: String? = null
     ): CitySearchResponse
 }

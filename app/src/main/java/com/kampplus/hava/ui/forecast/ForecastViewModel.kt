@@ -41,8 +41,8 @@ class ForecastViewModel(
     /** Başlığın altındaki "Ankara, Türkiye" satırı. */
     val subtitle: String = savedStateHandle.get<String>(ARG_SUBTITLE).orEmpty()
 
-    private val latitude: Double = savedStateHandle.get<String>(ARG_LATITUDE)?.toDoubleOrNull() ?: 0.0
-    private val longitude: Double = savedStateHandle.get<String>(ARG_LONGITUDE)?.toDoubleOrNull() ?: 0.0
+    val latitude: Double = savedStateHandle.get<String>(ARG_LATITUDE)?.toDoubleOrNull() ?: 0.0
+    val longitude: Double = savedStateHandle.get<String>(ARG_LONGITUDE)?.toDoubleOrNull() ?: 0.0
 
     private val _uiState = MutableStateFlow<LoadState<Forecast>>(LoadState.Loading)
     val uiState: StateFlow<LoadState<Forecast>> = _uiState.asStateFlow()

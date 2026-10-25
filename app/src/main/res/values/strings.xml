@@ -8,20 +8,41 @@
     -->
 
     <!-- Telefonun ana ekranında görünen uygulama adı. -->
-    <string name="app_name">Hava</string>
+    <string name="app_name">Lodos</string>
 
     <!-- Şehir listesi ekranı -->
-    <string name="search_hint">Şehir ara</string>
+    <string name="search_hint">İl, ilçe veya şehir ara</string>
+    <string name="search_title">Havayı bil, gününü yaşa.</string>
+    <string name="search_subtitle">Gerçek tahmini; doğru kombinlere, doğru zamana ve daha iyi planlara dönüştür.</string>
+    <string name="scope_turkey">Türkiye · İl ve ilçe</string>
+    <string name="scope_world">Dünya</string>
+    <string name="results_turkey">Türkiye sonuçları</string>
+    <string name="results_world">Dünya sonuçları</string>
+    <string name="city_count">%1$d şehir</string>
+    <string name="city_not_found">Şehir bulunamadı</string>
+    <string name="city_not_found_message">Yazımı kontrol et veya Dünya aramasını dene.</string>
     <string name="action_clear">Temizle</string>
     <string name="action_retry">Tekrar dene</string>
 
     <!-- Tahmin ekranı -->
     <string name="detail_title">Hava Tahmini</string>
     <string name="action_back">Geri</string>
+    <string name="action_share">Tahmini paylaş</string>
     <string name="detail_hourly">Saatlik</string>
+    <string name="hourly_subtitle">Önümüzdeki 24 saat</string>
     <string name="detail_daily">7 Günlük</string>
+    <string name="daily_subtitle">Sıcaklık aralığı</string>
     <string name="detail_feels_like">Hissedilen</string>
     <string name="detail_humidity">Nem</string>
     <string name="detail_wind">Rüzgâr</string>
+    <string name="forecast_empty">Bu şehir için tahmin bulunamadı.</string>
+    <string name="updated_at">Güncellendi %1$s</string>
+    <string name="sunlight_title">Güneş ve UV</string>
+    <string name="sunrise">Gün doğumu</string>
+    <string name="sunset">Gün batımı</string>
+    <string name="uv_index">UV indeksi</string>
+    <string name="now">Şimdi</string>
     <string name="today">Bugün</string>
+    <string name="daily_assistant_title">Günün Asistanı</string>
+    <string name="daily_assistant_subtitle">Gerçek tahmine göre kişisel hazırlık önerileri</string>
 </resources>

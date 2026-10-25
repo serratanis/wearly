@@ -36,9 +36,40 @@ data class City(
     val countryCode: String?,
     val country: String?,
     // Bazı kayıtlarda bölge bilgisi gelmez; soru işareti uygulamayı çökmekten korur.
-    val admin1: String?
+    val admin1: String?,
+    @SerializedName("feature_code")
+    val featureCode: String? = null,
+    val population: Long? = null,
+    val timezone: String? = null,
+    val admin2: String? = null
 ) {
-    /** Kartta ve tahmin ekranında gösterilen alt yazı: "Ankara, Türkiye". */
+    /** Kartta ve tahmin ekranında gösterilen tekrar içermeyen konum bilgisi. */
     val subtitle: String
-        get() = listOfNotNull(admin1, country).distinct().joinToString(", ")
+        get() = listOfNotNull(
+            admin1?.takeUnless { it.equals(name, ignoreCase = true) },
+            displayCountry
+        ).distinct().joinToString(", ")
+
+    val displayCountry: String?
+        get() = when (countryCode) {
+            "TR" -> "Türkiye"
+            else -> country
+        }
+
+    /** Open-Meteo'da ilçeler, adı kendi admin2 alanıyla eşleşen yerleşimlerdir. */
+    val isDistrict: Boolean
+        get() = countryCode == "TR" && admin2?.equals(name, ignoreCase = true) == true
+
+    val locationType: String
+        get() = when {
+            isDistrict -> "İlçe"
+            countryCode == "TR" -> "İl"
+            else -> "Şehir"
+        }
+}
+
+/** Arama kapsamı: Türkiye'nin il ve ilçeleri veya dünya genelindeki yerleşimler. */
+enum class SearchScope(val countryCode: String?) {
+    TURKEY("TR"),
+    WORLD(null)
 }

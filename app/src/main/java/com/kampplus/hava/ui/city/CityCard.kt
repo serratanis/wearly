@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -37,16 +38,22 @@ import com.kampplus.hava.ui.theme.HavaTheme
  */
 @Composable
 fun CityCard(city: City, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Card(onClick = onClick, modifier = modifier.fillMaxWidth()) {
+    ElevatedCard(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
+    ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             CountryBadge(code = city.countryCode)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = city.name,
+                    text = city.name.replaceFirstChar(Char::titlecase),
                     style = MaterialTheme.typography.titleMedium,
                     // Tek satıra sığmayan ad "..." ile kısaltılır, satır kaymaz.
                     maxLines = 1,
@@ -58,6 +65,17 @@ fun CityCard(city: City, onClick: () -> Unit, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = if (city.countryCode == "TR" &&
+                        !city.isDistrict
+                    ) {
+                        "İlçeleri veya il merkezini seç"
+                    } else {
+                        "Güncel tahmini görüntüle"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
             Icon(
@@ -80,17 +98,24 @@ fun CityCard(city: City, onClick: () -> Unit, modifier: Modifier = Modifier) {
 private fun CountryBadge(code: String?, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.size(44.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
-                text = code ?: "?",
-                style = MaterialTheme.typography.labelLarge
+                text = code?.countryFlag() ?: "⌖",
+                style = MaterialTheme.typography.titleLarge
             )
         }
     }
+}
+
+private fun String.countryFlag(): String {
+    if (length != 2) return uppercase()
+    return uppercase().map { letter ->
+        String(Character.toChars(0x1F1E6 + (letter.code - 'A'.code)))
+    }.joinToString("")
 }
 
 @Preview(showBackground = true)

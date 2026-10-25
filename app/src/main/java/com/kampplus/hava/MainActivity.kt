@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kampplus.hava.data.UserPreferences
 import com.kampplus.hava.ui.HavaNavHost
 import com.kampplus.hava.ui.theme.HavaTheme
 
@@ -29,11 +32,18 @@ class MainActivity : ComponentActivity() {
 
         // İçeriği durum ve navigasyon çubuklarının altına kadar yayar.
         enableEdgeToEdge()
+        val preferences = UserPreferences(applicationContext)
 
         // Süslü parantezin içi Compose dünyasıdır.
         setContent {
-            HavaTheme {
-                HavaNavHost()
+            val settings by preferences.settings.collectAsStateWithLifecycle()
+            HavaTheme(themeMode = settings.themeMode) {
+                HavaNavHost(
+                    settings = settings,
+                    onTemperatureUnitChange = preferences::setTemperatureUnit,
+                    onThemeModeChange = preferences::setThemeMode,
+                    onDailyAdviceChange = preferences::setDailyAdviceEnabled
+                )
             }
         }
     }

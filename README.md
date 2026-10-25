@@ -8,13 +8,31 @@
 
 </div>
 
-# Hava — Şehir Arama ve Hava Tahmini
+# Lodos — Havayı Bil, Gününü Yaşa
 
-Bilişim Kampı Android eğitiminin **referans çözümü**. Open-Meteo servisinden şehir arar, seçilen şehrin anlık durumunu, saatlik ve 7 günlük tahminini gösterir; yükleniyor / veri / boş / hata durumlarının tamamını ele alır.
+Bilişim Kampı Android eğitiminin **referans çözümü** üzerine geliştirilen günlük hava ve planlama asistanı. Gerçek tahmini; il/ilçe seçimi, günlük özet, UV korunma rehberi ve hava koşullarına duyarlı Stil Asistanı ile uygulanabilir kararlara dönüştürür.
 
 Mimari ayrıntıları için [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+1. gün değerlendirme maddeleri ve çalıştırma adımları için [docs/DAY1-CHECKLIST.md](docs/DAY1-CHECKLIST.md).
+
 **Teknoloji:** Kotlin · Jetpack Compose (Material 3) · ViewModel + StateFlow · Coroutines · Retrofit + Gson · Navigation Compose
+
+## Öne çıkan özellikler
+
+- Hava durumuna göre renk değiştiren modern Material 3 arayüz ve koyu tema
+- Dünya genelinde şehir arama ve hızlı şehir kısayolları
+- Türkiye'nin 81 ili için il merkezi veya bağlı ilçe seçimi
+- Anlık sıcaklık, hissedilen sıcaklık, nem ve rüzgâr bilgisi
+- Önümüzdeki 24 saat ve 7 günlük sıcaklık aralığı tahmini
+- Gün doğumu, gün batımı ve UV indeksi
+- Giysi, yağmur, rüzgâr ve güneş korunma önerileri
+- Doğal dilli gün özeti ve en uygun dışarı çıkma aralığı
+- Serbest metin ve hazır sorularla çalışan hava duyarlı Stil Asistanı
+- Sistem/açık/koyu tema ve kalıcı kullanıcı tercihleri
+- Celsius/Fahrenheit geçişi ve sistem paylaşım menüsü
+- Yükleniyor, başarılı, boş ve hata durumları için ayrı kullanıcı deneyimi
+- TalkBack açıklamaları, ölçeklenebilir tipografi ve ekran döndürmede state koruması
 
 ## Mimari — üç katman
 
@@ -41,8 +59,10 @@ com.kampplus.hava
 └── ui/                        Ne çizilir, ne zaman değişir?
     ├── LoadState.kt           Loading / Success / Empty / Error
     ├── HavaNavHost.kt         iki ekran arası geçiş
-    ├── city/                  CityScreen · CityViewModel · CityCard
+    ├── city/                  Şehir arama ve Türkiye/dünya seçimi
+    ├── district/              İl → ilçe seçimi
     ├── forecast/              ForecastScreen · ForecastViewModel
+    ├── style/                 Hava duyarlı sohbet tipi Stil Asistanı
     ├── component/             ShimmerList · EmptyView · ErrorView
     └── theme/                 Color · Theme · Type
 ```
@@ -53,6 +73,8 @@ com.kampplus.hava
 |---|---|
 | Şehir arama | `https://geocoding-api.open-meteo.com/v1/search?name=Ankara&count=10&language=tr` |
 | Tahmin | `https://api.open-meteo.com/v1/forecast?latitude=..&longitude=..&current=..&hourly=..&daily=..&forecast_days=7&timezone=auto` |
+
+Türkiye ilçe adları ve merkez koordinatları, anahtarsız açık coğrafya uç noktasından il seçildikten sonra alınır. Tahmin her zaman seçilen il veya ilçenin koordinatıyla Open-Meteo'dan istenir.
 
 - Sonuç yoksa arama yanıtında `results` alanı **hiç gelmez** → Boş (Empty) durumu.
 - Tahmin yanıtı **sütun** biçimindedir: `hourly.time[i]` ile `hourly.temperature_2m[i]` aynı saate aittir.

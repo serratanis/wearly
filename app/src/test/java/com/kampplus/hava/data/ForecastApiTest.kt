@@ -83,6 +83,9 @@ class ForecastApiTest {
         assertEquals(LocalDate.parse("2026-09-24"), daily[0].date)
         assertEquals(9.0, daily[0].minTemperatureC, 0.01)
         assertEquals(18.1, daily[0].maxTemperatureC, 0.01)
+        assertEquals(LocalDateTime.parse("2026-09-24T06:39"), daily[0].sunrise)
+        assertEquals(LocalDateTime.parse("2026-09-24T18:45"), daily[0].sunset)
+        assertEquals(5.2, checkNotNull(daily[0].uvIndexMax), 0.01)
         assertEquals(LocalDate.parse("2026-09-25"), daily[1].date)
         assertEquals(6.2, daily[1].minTemperatureC, 0.01)
         assertEquals(20.1, daily[1].maxTemperatureC, 0.01)
@@ -125,5 +128,7 @@ class ForecastApiTest {
         assertTrue("longitude eksik: $path", path.contains("longitude=32.87"))
         // timezone=auto olmazsa zamanlar UTC gelir ve saatler kayar.
         assertTrue("timezone=auto olmali: $path", path.contains("timezone=auto"))
+        assertTrue("gun dogumu istenmeli: $path", path.contains("sunrise"))
+        assertTrue("UV indeksi istenmeli: $path", path.contains("uv_index_max"))
     }
 }
