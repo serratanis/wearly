@@ -6,6 +6,6 @@
             android:name=".DayOneActivity"
             android:exported="true"
             android:label="1. Gün Alıştırması"
-            android:theme="@style/Theme.Hava" />
+            android:theme="@style/Theme.Wearly" />
     </application>
 </manifest>

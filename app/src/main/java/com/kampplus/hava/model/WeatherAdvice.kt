@@ -23,6 +23,94 @@ data class SunProtection(
     val progress: Float
 )
 
+/** Kullanıcıya tek bakışta okunabilen ve gerekçesi görülebilen 0–100 hava konforu. */
+data class ComfortScore(
+    val value: Int,
+    val label: String,
+    val explanation: String
+)
+
+enum class ActivityType {
+    WALK,
+    SPORT,
+    COFFEE,
+    COMMUTE
+}
+
+data class ActivityWindow(
+    val timeRange: String,
+    val detail: String
+)
+
+/** Önümüzdeki gerçek saatlik tahminden seçilen etkinliğe en uygun iki saatlik aralık. */
+fun Forecast.bestTimeFor(activity: ActivityType): ActivityWindow? {
+    val hours = hourly.take(24).filter { hour ->
+        when (activity) {
+            ActivityType.WALK -> hour.time.hour in 8..20
+            ActivityType.SPORT -> hour.time.hour in 7..20
+            ActivityType.COFFEE -> hour.time.hour in 9..21
+            ActivityType.COMMUTE -> hour.time.hour in 7..10 || hour.time.hour in 16..19
+        }
+    }
+    val windows = hours.windowed(size = 2, step = 1).filter { it[1].time == it[0].time.plusHours(1) }
+    val idealTemperature = when (activity) {
+        ActivityType.WALK -> 20
+        ActivityType.SPORT -> 16
+        ActivityType.COFFEE -> 22
+        ActivityType.COMMUTE -> 19
+    }
+    val best = windows.minByOrNull { window ->
+        window.sumOf { hour ->
+            val rainWeight = if (activity == ActivityType.SPORT) 3 else 2
+            (hour.precipitationProbability ?: 0) * rainWeight +
+                kotlin.math.abs(hour.temperatureC - idealTemperature).toInt() * 4
+        }
+    } ?: return null
+    val averageRain = best.map { it.precipitationProbability ?: 0 }.average().toInt()
+    val averageTemperature = best.map(HourlyForecast::temperatureC).average().toInt()
+    return ActivityWindow(
+        timeRange = "%02d.00–%02d.00".format(best.first().time.hour, best.last().time.hour + 1),
+        detail = "$averageTemperature°C · ortalama yağış olasılığı %$averageRain"
+    )
+}
+
+fun Forecast.comfortScore(): ComfortScore {
+    val feelsLike = current.apparentTemperatureC ?: current.temperatureC
+    val rain = daily.firstOrNull()?.precipitationProbability ?: 0
+    val wind = current.windSpeedKmh ?: 0.0
+    val humidity = current.humidityPercent ?: 50
+    val uv = daily.firstOrNull()?.uvIndexMax ?: 0.0
+
+    val temperaturePenalty = (kotlin.math.abs(feelsLike - 21.0) * 3.0).coerceAtMost(32.0)
+    val rainPenalty = (rain * 0.3).coerceAtMost(30.0)
+    val windPenalty = ((wind - 15.0).coerceAtLeast(0.0) * 0.8).coerceAtMost(18.0)
+    val humidityPenalty = ((kotlin.math.abs(humidity - 50) - 20).coerceAtLeast(0) * 0.35).coerceAtMost(10.0)
+    val uvPenalty = ((uv - 6.0).coerceAtLeast(0.0) * 2.0).coerceAtMost(10.0)
+    val score = (100 - temperaturePenalty - rainPenalty - windPenalty - humidityPenalty - uvPenalty)
+        .toInt()
+        .coerceIn(0, 100)
+    val label = when {
+        score >= 85 -> "Çok rahat"
+        score >= 70 -> "Rahat"
+        score >= 50 -> "Dengeli"
+        score >= 30 -> "Hazırlık gerekli"
+        else -> "Zorlayıcı"
+    }
+    val strongestFactor = listOf(
+        rainPenalty to "yağış",
+        temperaturePenalty to "hissedilen sıcaklık",
+        windPenalty to "rüzgâr",
+        humidityPenalty to "nem",
+        uvPenalty to "UV"
+    ).maxBy { it.first }
+    val explanation = if (strongestFactor.first < 5) {
+        "Koşullar günün büyük bölümünde dengeli görünüyor."
+    } else {
+        "Puanı en çok ${strongestFactor.second} etkiliyor; ayrıntılı önerileri aşağıda görebilirsin."
+    }
+    return ComfortScore(score, label, explanation)
+}
+
 fun Forecast.dayInsight(): DayInsight {
     val today = daily.firstOrNull()
     val min = today?.minTemperatureC

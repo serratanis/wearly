@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,6 +42,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kampplus.hava.R
+import com.kampplus.hava.model.ActivityType
 import com.kampplus.hava.model.CurrentWeather
 import com.kampplus.hava.model.DailyForecast
 import com.kampplus.hava.model.Forecast
@@ -66,6 +71,8 @@ import com.kampplus.hava.model.HourlyForecast
 import com.kampplus.hava.model.TemperatureUnit
 import com.kampplus.hava.model.UserSettings
 import com.kampplus.hava.model.WeatherCondition
+import com.kampplus.hava.model.bestTimeFor
+import com.kampplus.hava.model.comfortScore
 import com.kampplus.hava.model.dailyAdvice
 import com.kampplus.hava.model.dayInsight
 import com.kampplus.hava.model.sunProtection
@@ -204,6 +211,16 @@ private fun ForecastContent(
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
+        ComfortScoreCard(
+            forecast = forecast,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        ActivityPlannerCard(
+            forecast = forecast,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
         if (settings.dailyAdviceEnabled) {
             DailyAssistantCard(
                 forecast = forecast,
@@ -233,6 +250,90 @@ private fun ForecastContent(
         )
         DataSourceNote()
         Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun ActivityPlannerCard(forecast: Forecast, modifier: Modifier = Modifier) {
+    var selected by rememberSaveable { mutableStateOf(ActivityType.WALK) }
+    val window = forecast.bestTimeFor(selected)
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text("Planın için en iyi zaman", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                "Önümüzdeki 24 saatin sıcaklık ve yağış verileri birlikte değerlendirilir.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(ActivityType.entries) { activity ->
+                    AssistChip(
+                        onClick = { selected = activity },
+                        label = { Text(if (selected == activity) "✓ ${activity.label}" else activity.label) }
+                    )
+                }
+            }
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
+                    Text(window?.timeRange ?: "Uygun aralık bulunamadı", style = MaterialTheme.typography.titleMedium)
+                    window?.let { Text(it.detail, style = MaterialTheme.typography.bodySmall) }
+                }
+            }
+        }
+    }
+}
+
+private val ActivityType.label: String
+    get() = when (this) {
+        ActivityType.WALK -> "🚶 Yürüyüş"
+        ActivityType.SPORT -> "🏃 Spor"
+        ActivityType.COFFEE -> "☕ Kahve"
+        ActivityType.COMMUTE -> "🚌 Yolculuk"
+    }
+
+@Composable
+private fun ComfortScoreCard(forecast: Forecast, modifier: Modifier = Modifier) {
+    val score = forecast.comfortScore()
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(score.value.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                    Text("/ 100", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text("Wearly Comfort Score", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Text(score.label, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(score.explanation, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
 }
 
@@ -733,7 +834,7 @@ private fun uvLabel(value: Double): String = when {
 
 private fun shareForecast(context: Context, cityName: String, current: CurrentWeather, unit: TemperatureUnit) {
     val condition = WeatherCondition.fromWeatherCode(current.weatherCode)
-    val text = "$cityName: ${temperature(current.temperatureC, unit)}, ${condition.label}. Lodos ile paylaşıldı."
+    val text = "$cityName: ${temperature(current.temperatureC, unit)}, ${condition.label}. wearly. ile paylaşıldı."
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_TEXT, text)

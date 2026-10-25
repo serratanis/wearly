@@ -13,12 +13,15 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,7 +40,13 @@ import com.kampplus.hava.ui.theme.HavaTheme
  *   yalnızca haber verir — olay yukarı, veri aşağı (state hoisting).
  */
 @Composable
-fun CityCard(city: City, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun CityCard(
+    city: City,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isFavorite: Boolean = false,
+    onFavoriteClick: (() -> Unit)? = null
+) {
     ElevatedCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -78,12 +87,25 @@ fun CityCard(city: City, onClick: () -> Unit, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                // Ok yalnızca görseldir; "dokunulabilir" bilgisini Card zaten verir.
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (onFavoriteClick != null) {
+                val favoriteDescription = if (isFavorite) "Favorilerden çıkar" else "Favorilere ekle"
+                IconButton(
+                    onClick = onFavoriteClick,
+                    modifier = Modifier.semantics { contentDescription = favoriteDescription }
+                ) {
+                    Text(
+                        text = if (isFavorite) "★" else "☆",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

@@ -10,10 +10,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kampplus.hava.model.City
+import com.kampplus.hava.model.OutfitPriority
+import com.kampplus.hava.model.StylePreference
+import com.kampplus.hava.model.TemperatureSensitivity
 import com.kampplus.hava.model.TemperatureUnit
 import com.kampplus.hava.model.ThemeMode
 import com.kampplus.hava.model.UserSettings
 import com.kampplus.hava.ui.city.CityRoute
+import com.kampplus.hava.ui.day.MyDayRoute
 import com.kampplus.hava.ui.district.DistrictRoute
 import com.kampplus.hava.ui.district.DistrictViewModel
 import com.kampplus.hava.ui.forecast.ForecastRoute
@@ -21,6 +25,7 @@ import com.kampplus.hava.ui.forecast.ForecastViewModel
 import com.kampplus.hava.ui.settings.SettingsScreen
 import com.kampplus.hava.ui.style.StyleAssistantRoute
 import com.kampplus.hava.ui.style.StyleAssistantViewModel
+import com.kampplus.hava.ui.wardrobe.WardrobeRoute
 
 /**
  * Uygulamanın iki ekranı ve aralarındaki geçiş.
@@ -39,6 +44,9 @@ fun HavaNavHost(
     onTemperatureUnitChange: (TemperatureUnit) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDailyAdviceChange: (Boolean) -> Unit,
+    onStylePreferenceChange: (StylePreference) -> Unit,
+    onTemperatureSensitivityChange: (TemperatureSensitivity) -> Unit,
+    onOutfitPriorityChange: (OutfitPriority) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -55,8 +63,16 @@ fun HavaNavHost(
                     )
                 },
                 onStyleClick = { city -> navController.navigate(styleRoute(city.name, city.latitude, city.longitude)) },
+                onMyDayClick = { navController.navigate(MY_DAY_ROUTE) },
+                onWardrobeClick = { navController.navigate(WARDROBE_ROUTE) },
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) }
             )
+        }
+        composable(MY_DAY_ROUTE) {
+            MyDayRoute(onBack = { navController.popBackStack() })
+        }
+        composable(WARDROBE_ROUTE) {
+            WardrobeRoute(onBack = { navController.popBackStack() })
         }
         composable(
             route = DISTRICT_ROUTE,
@@ -109,7 +125,10 @@ fun HavaNavHost(
                 navArgument(StyleAssistantViewModel.ARG_LONGITUDE) { type = NavType.StringType }
             )
         ) {
-            StyleAssistantRoute(onBack = { navController.popBackStack() })
+            StyleAssistantRoute(
+                settings = settings,
+                onBack = { navController.popBackStack() }
+            )
         }
         composable(SETTINGS_ROUTE) {
             SettingsScreen(
@@ -117,7 +136,10 @@ fun HavaNavHost(
                 onBack = { navController.popBackStack() },
                 onTemperatureUnitChange = onTemperatureUnitChange,
                 onThemeModeChange = onThemeModeChange,
-                onDailyAdviceChange = onDailyAdviceChange
+                onDailyAdviceChange = onDailyAdviceChange,
+                onStylePreferenceChange = onStylePreferenceChange,
+                onTemperatureSensitivityChange = onTemperatureSensitivityChange,
+                onOutfitPriorityChange = onOutfitPriorityChange
             )
         }
     }
@@ -126,6 +148,8 @@ fun HavaNavHost(
 /** Liste ekranının adresi. */
 private const val CITY_ROUTE = "city"
 private const val SETTINGS_ROUTE = "settings"
+private const val MY_DAY_ROUTE = "my-day"
+private const val WARDROBE_ROUTE = "wardrobe"
 private const val DISTRICT_ROUTE =
     "district?provinceName={provinceName}&latitude={latitude}&longitude={longitude}"
 private const val STYLE_ROUTE =

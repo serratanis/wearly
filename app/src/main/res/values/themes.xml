@@ -6,5 +6,7 @@
     (ui/theme/Theme.kt) tanımlanır; buradaki tema yalnızca pencere kabuğunu
     ayarlar: başlık çubuğu olmasın (NoActionBar).
   -->
-  <style name="Theme.Hava" parent="android:Theme.Material.Light.NoActionBar" />
+  <style name="Theme.Wearly" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:windowBackground">@color/ic_launcher_background</item>
+  </style>
 </resources>

@@ -8,12 +8,12 @@
     -->
 
     <!-- Telefonun ana ekranında görünen uygulama adı. -->
-    <string name="app_name">Lodos</string>
+    <string name="app_name">wearly.</string>
 
     <!-- Şehir listesi ekranı -->
     <string name="search_hint">İl, ilçe veya şehir ara</string>
-    <string name="search_title">Havayı bil, gününü yaşa.</string>
-    <string name="search_subtitle">Gerçek tahmini; doğru kombinlere, doğru zamana ve daha iyi planlara dönüştür.</string>
+    <string name="search_title">Your weather. Your style. Your day.</string>
+    <string name="search_subtitle">Hava durumunu keşfet, tarzını oluştur ve gününü sana özel önerilerle planla.</string>
     <string name="scope_turkey">Türkiye · İl ve ilçe</string>
     <string name="scope_world">Dünya</string>
     <string name="results_turkey">Türkiye sonuçları</string>

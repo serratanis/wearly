@@ -61,6 +61,41 @@ class WeatherAdviceTest {
         assertEquals("10.00–12.00 dışarı çıkmak için en dengeli aralık", forecast.dayInsight().bestTime)
     }
 
+    @Test
+    fun `dengeli kosullar yuksek ve aciklanabilir konfor puani uretir`() {
+        val score = testForecast(uv = 2.0, rain = 10).comfortScore()
+
+        assertTrue(score.value in 85..100)
+        assertEquals("Çok rahat", score.label)
+        assertTrue(score.explanation.isNotBlank())
+    }
+
+    @Test
+    fun `yogun yagmur konfor puanini dusurur`() {
+        val calm = testForecast(uv = 2.0, rain = 0).comfortScore()
+        val rainy = testForecast(uv = 2.0, rain = 100).comfortScore()
+
+        assertTrue(rainy.value < calm.value)
+        assertTrue(rainy.explanation.contains("yağış"))
+    }
+
+    @Test
+    fun `etkinlik planlayici daha kuru iki saatlik araligi secer`() {
+        val forecast = testForecast(uv = 2.0, rain = 10).copy(
+            hourly = listOf(
+                HourlyForecast(LocalDateTime.parse("2026-10-25T09:00"), 18.0, 61, 80),
+                HourlyForecast(LocalDateTime.parse("2026-10-25T10:00"), 19.0, 3, 10),
+                HourlyForecast(LocalDateTime.parse("2026-10-25T11:00"), 20.0, 1, 5),
+                HourlyForecast(LocalDateTime.parse("2026-10-25T12:00"), 22.0, 1, 10)
+            )
+        )
+
+        val window = forecast.bestTimeFor(ActivityType.WALK)!!
+
+        assertEquals("10.00–12.00", window.timeRange)
+        assertTrue(window.detail.contains("%7"))
+    }
+
     private fun testForecast(uv: Double, rain: Int) = Forecast(
         current = CurrentWeather(
             temperatureC = 22.0,

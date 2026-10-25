@@ -42,7 +42,10 @@ class MainActivity : ComponentActivity() {
                     settings = settings,
                     onTemperatureUnitChange = preferences::setTemperatureUnit,
                     onThemeModeChange = preferences::setThemeMode,
-                    onDailyAdviceChange = preferences::setDailyAdviceEnabled
+                    onDailyAdviceChange = preferences::setDailyAdviceEnabled,
+                    onStylePreferenceChange = preferences::setStylePreference,
+                    onTemperatureSensitivityChange = preferences::setTemperatureSensitivity,
+                    onOutfitPriorityChange = preferences::setOutfitPriority
                 )
             }
         }

@@ -2,6 +2,8 @@ package com.kampplus.hava.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,11 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kampplus.hava.model.OutfitPriority
+import com.kampplus.hava.model.StylePreference
+import com.kampplus.hava.model.TemperatureSensitivity
 import com.kampplus.hava.model.TemperatureUnit
 import com.kampplus.hava.model.ThemeMode
 import com.kampplus.hava.model.UserSettings
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     settings: UserSettings,
@@ -39,6 +44,9 @@ fun SettingsScreen(
     onTemperatureUnitChange: (TemperatureUnit) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDailyAdviceChange: (Boolean) -> Unit,
+    onStylePreferenceChange: (StylePreference) -> Unit,
+    onTemperatureSensitivityChange: (TemperatureSensitivity) -> Unit,
+    onOutfitPriorityChange: (OutfitPriority) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -103,6 +111,51 @@ fun SettingsScreen(
                 }
             }
 
+            PreferenceCard(
+                title = "Stil profilim",
+                subtitle = "Wearly Look, planında özel bir stil belirtmezsen bu çizgiyi kullanır."
+            ) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StylePreference.entries.forEach { preference ->
+                        FilterChip(
+                            selected = settings.stylePreference == preference,
+                            onClick = { onStylePreferenceChange(preference) },
+                            label = { Text(preference.label) }
+                        )
+                    }
+                }
+            }
+
+            PreferenceCard(
+                title = "Sıcaklığı nasıl hissederim?",
+                subtitle = "Önerilen katmanlar yalnızca termometreye değil, sana göre de ayarlanır."
+            ) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TemperatureSensitivity.entries.forEach { sensitivity ->
+                        FilterChip(
+                            selected = settings.temperatureSensitivity == sensitivity,
+                            onClick = { onTemperatureSensitivityChange(sensitivity) },
+                            label = { Text(sensitivity.label) }
+                        )
+                    }
+                }
+            }
+
+            PreferenceCard(
+                title = "Kombin önceliğim",
+                subtitle = "Konfor ve şıklık arasındaki dengeyi belirle."
+            ) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutfitPriority.entries.forEach { priority ->
+                        FilterChip(
+                            selected = settings.outfitPriority == priority,
+                            onClick = { onOutfitPriorityChange(priority) },
+                            label = { Text(priority.label) }
+                        )
+                    }
+                }
+            }
+
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
@@ -113,11 +166,11 @@ fun SettingsScreen(
                 ) {
                     Text("Veri ve gizlilik", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Hava ve şehir sonuçları Open-Meteo’dan, Türkiye ilçe koordinatları açık coğrafya servisinden alınır. Lodos hesap açtırmaz; arama ve tercihlerini kendi sunucusuna kaydetmez.",
+                        "Hava ve şehir sonuçları Open-Meteo’dan, Türkiye ilçe koordinatları açık coğrafya servisinden alınır. wearly. hesap açtırmaz; arama ve tercihlerini kendi sunucusuna kaydetmez.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text("Lodos · Sürüm 1.1.0", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                    Text("wearly. · Sürüm 1.1.0", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -147,4 +200,27 @@ private val ThemeMode.label: String
         ThemeMode.SYSTEM -> "Sistem"
         ThemeMode.LIGHT -> "Açık"
         ThemeMode.DARK -> "Koyu"
+    }
+
+private val StylePreference.label: String
+    get() = when (this) {
+        StylePreference.CASUAL -> "Günlük"
+        StylePreference.ELEGANT -> "Zarif"
+        StylePreference.SPORTY -> "Sportif"
+        StylePreference.MINIMAL -> "Minimal"
+        StylePreference.BUSINESS -> "Ofis"
+    }
+
+private val TemperatureSensitivity.label: String
+    get() = when (this) {
+        TemperatureSensitivity.COLD_SENSITIVE -> "Çabuk üşürüm"
+        TemperatureSensitivity.BALANCED -> "Dengeli"
+        TemperatureSensitivity.HEAT_SENSITIVE -> "Çabuk ısınırım"
+    }
+
+private val OutfitPriority.label: String
+    get() = when (this) {
+        OutfitPriority.COMFORT -> "Konfor"
+        OutfitPriority.BALANCED -> "Dengeli"
+        OutfitPriority.ELEGANCE -> "Şıklık"
     }

@@ -20,7 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,23 +39,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kampplus.hava.data.WardrobeStore
+import com.kampplus.hava.model.OutfitRecommendation
 import com.kampplus.hava.model.StyleMessage
+import com.kampplus.hava.model.UserSettings
 import com.kampplus.hava.ui.LoadState
 
 @Composable
-fun StyleAssistantRoute(onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: StyleAssistantViewModel = viewModel()) {
+fun StyleAssistantRoute(
+    settings: UserSettings,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: StyleAssistantViewModel = viewModel()
+) {
+    val context = LocalContext.current
+    val wardrobeStore = remember(context) { WardrobeStore(context.applicationContext) }
+    val wardrobe by wardrobeStore.items.collectAsStateWithLifecycle()
     val forecast by viewModel.forecast.collectAsStateWithLifecycle()
     val messages by viewModel.messages.collectAsStateWithLifecycle()
+    val latestOutfit by viewModel.latestOutfit.collectAsStateWithLifecycle()
     StyleAssistantScreen(
         cityName = viewModel.cityName,
         forecastState = forecast,
         messages = messages,
-        onSend = viewModel::send,
+        latestOutfit = latestOutfit,
+        onSend = { viewModel.send(it, wardrobe, settings) },
         onBack = onBack,
         modifier = modifier
     )
@@ -65,6 +81,7 @@ private fun StyleAssistantScreen(
     cityName: String,
     forecastState: LoadState<*>,
     messages: List<StyleMessage>,
+    latestOutfit: OutfitRecommendation?,
     onSend: (String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -153,8 +170,56 @@ private fun StyleAssistantScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                latestOutfit?.let { outfit ->
+                    item { OutfitCard(outfit) }
+                }
                 items(messages) { message -> MessageBubble(message) }
             }
+        }
+    }
+}
+
+@Composable
+private fun OutfitCard(outfit: OutfitRecommendation) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text("WEARLY LOOK", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(outfit.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            OutfitLine("👕", "Üst", outfit.top)
+            OutfitLine("👖", "Alt", outfit.bottom)
+            OutfitLine("🧥", "Dış katman", outfit.outerwear)
+            OutfitLine("👟", "Ayakkabı", outfit.shoes)
+            OutfitLine("👜", "Aksesuar", outfit.accessory)
+            Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Renk paleti", style = MaterialTheme.typography.labelLarge)
+                    Text(outfit.colorPalette, style = MaterialTheme.typography.bodyMedium)
+                    Text(outfit.protection, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Neden: ${outfit.reason}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OutfitLine(icon: String, label: String, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(icon, style = MaterialTheme.typography.titleLarge)
+        Column {
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -180,4 +245,12 @@ private fun MessageBubble(message: StyleMessage) {
     }
 }
 
-private val QUICK_PROMPTS = listOf("Şık bir kombin", "Ofis için", "Spor ve rahat", "Yağmura uygun")
+private val QUICK_PROMPTS = listOf(
+    "Şık bir kombin",
+    "Ofis için",
+    "Spor ve rahat",
+    "Kampüs için",
+    "Daha sıcak",
+    "Daha hafif",
+    "Dolabımdan oluştur"
+)

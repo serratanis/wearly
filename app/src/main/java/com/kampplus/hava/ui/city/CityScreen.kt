@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kampplus.hava.R
+import com.kampplus.hava.data.FavoriteCityStore
 import com.kampplus.hava.model.City
 import com.kampplus.hava.model.SearchScope
 import com.kampplus.hava.ui.LoadState
@@ -58,10 +60,15 @@ import com.kampplus.hava.ui.theme.HavaTheme
 fun CityRoute(
     onCityClick: (City) -> Unit,
     onStyleClick: (City) -> Unit,
+    onMyDayClick: () -> Unit,
+    onWardrobeClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CityViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val favoriteStore = androidx.compose.runtime.remember(context) { FavoriteCityStore(context.applicationContext) }
+    val favorites by favoriteStore.cities.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
     val scope by viewModel.scope.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -70,11 +77,15 @@ fun CityRoute(
         query = query,
         scope = scope,
         uiState = uiState,
+        favorites = favorites,
         onQueryChange = viewModel::onQueryChange,
         onScopeChange = viewModel::onScopeChange,
         onSearch = viewModel::search,
         onCityClick = onCityClick,
         onStyleClick = onStyleClick,
+        onMyDayClick = onMyDayClick,
+        onWardrobeClick = onWardrobeClick,
+        onFavoriteClick = favoriteStore::toggle,
         onSettingsClick = onSettingsClick,
         modifier = modifier
     )
@@ -85,11 +96,15 @@ fun CityScreen(
     query: String,
     scope: SearchScope,
     uiState: LoadState<List<City>>,
+    favorites: List<City>,
     onQueryChange: (String) -> Unit,
     onScopeChange: (SearchScope) -> Unit,
     onSearch: () -> Unit,
     onCityClick: (City) -> Unit,
     onStyleClick: (City) -> Unit,
+    onMyDayClick: () -> Unit,
+    onWardrobeClick: () -> Unit,
+    onFavoriteClick: (City) -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -113,9 +128,13 @@ fun CityScreen(
                     LoadState.Loading -> ShimmerList()
                     is LoadState.Success -> CityList(
                         cities = uiState.data,
+                        favorites = favorites,
                         scope = scope,
                         onCityClick = onCityClick,
                         onStyleClick = onStyleClick,
+                        onMyDayClick = onMyDayClick,
+                        onWardrobeClick = onWardrobeClick,
+                        onFavoriteClick = onFavoriteClick,
                         onExplore = {
                             onQueryChange("")
                             onScopeChange(if (scope == SearchScope.TURKEY) SearchScope.WORLD else SearchScope.TURKEY)
@@ -155,7 +174,7 @@ private fun SearchHeader(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Image(
-                    painter = painterResource(R.drawable.hava_logo),
+                    painter = painterResource(R.drawable.wearly_mark),
                     contentDescription = null,
                     modifier = Modifier.size(34.dp)
                 )
@@ -295,9 +314,13 @@ private fun ResultsHeader(scope: SearchScope, uiState: LoadState<List<City>>, mo
 @Composable
 private fun CityList(
     cities: List<City>,
+    favorites: List<City>,
     scope: SearchScope,
     onCityClick: (City) -> Unit,
     onStyleClick: (City) -> Unit,
+    onMyDayClick: () -> Unit,
+    onWardrobeClick: () -> Unit,
+    onFavoriteClick: (City) -> Unit,
     onExplore: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -306,8 +329,39 @@ private fun CityList(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        if (favorites.isNotEmpty()) {
+            item {
+                Text(
+                    "Favorilerim",
+                    modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            items(items = favorites, key = { "favorite-${it.id}-${it.latitude}-${it.longitude}" }) { city ->
+                CityCard(
+                    city = city,
+                    onClick = { onCityClick(city) },
+                    isFavorite = true,
+                    onFavoriteClick = { onFavoriteClick(city) }
+                )
+            }
+            item {
+                Text(
+                    "Arama sonuçları",
+                    modifier = Modifier.padding(top = 10.dp, bottom = 2.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
         items(items = cities, key = { it.id }) { city ->
-            CityCard(city = city, onClick = { onCityClick(city) })
+            CityCard(
+                city = city,
+                onClick = { onCityClick(city) },
+                isFavorite = favorites.any { it.id == city.id && it.latitude == city.latitude && it.longitude == city.longitude },
+                onFavoriteClick = { onFavoriteClick(city) }
+            )
         }
         cities.firstOrNull()?.let { city ->
             item {
@@ -344,6 +398,60 @@ private fun CityList(
                         }
                         Text("→", style = MaterialTheme.typography.titleLarge)
                     }
+                }
+            }
+        }
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .clickable(onClick = onMyDayClick),
+                shape = RoundedCornerShape(22.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Row(
+                    modifier = Modifier.padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Text("🗓️", style = MaterialTheme.typography.headlineMedium)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("My Day", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            "Planlarını ekle, düzenle ve gününü tek akışta gör.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text("→", style = MaterialTheme.typography.titleLarge)
+                }
+            }
+        }
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .clickable(onClick = onWardrobeClick),
+                shape = RoundedCornerShape(22.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Row(
+                    modifier = Modifier.padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Text("👚", style = MaterialTheme.typography.headlineMedium)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("My Wardrobe", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            "Kendi parçalarını kaydet; asistan yalnızca dolabındakileri kullansın.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text("→", style = MaterialTheme.typography.titleLarge)
                 }
             }
         }
@@ -400,11 +508,15 @@ private fun CityScreenPreview() {
             uiState = LoadState.Success(
                 listOf(City(323786, "Ankara", 39.91987, 32.85427, "TR", "Türkiye", "Ankara", "PPLC"))
             ),
+            favorites = emptyList(),
             onQueryChange = {},
             onScopeChange = {},
             onSearch = {},
             onCityClick = {},
             onStyleClick = {},
+            onMyDayClick = {},
+            onWardrobeClick = {},
+            onFavoriteClick = {},
             onSettingsClick = {}
         )
     }
