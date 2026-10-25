@@ -1,123 +1,116 @@
 <div align="center">
 
-<img src="docs/qr-repo.png" alt="github.com/tc-yusufburakdemir/weather-app adresinin QR kodu" width="220">
+# wearly.
 
-**Repoya erişim**
+### Your weather. Your style. Your day.
 
-[github.com/tc-yusufburakdemir/weather-app](https://github.com/tc-yusufburakdemir/weather-app)
+Hava durumunu keşfet, tarzını oluştur ve gününü sana özel önerilerle planla.
+
+**Kotlin · Jetpack Compose · Material 3 · MVVM · Open-Meteo**
 
 </div>
 
-# Lodos — Havayı Bil, Gününü Yaşa
+## Nedir?
 
-Bilişim Kampı Android eğitiminin **referans çözümü** üzerine geliştirilen günlük hava ve planlama asistanı. Gerçek tahmini; il/ilçe seçimi, günlük özet, UV korunma rehberi ve hava koşullarına duyarlı Stil Asistanı ile uygulanabilir kararlara dönüştürür.
+wearly., hava tahminini yalnızca derece gösteren bir ekrandan çıkarıp günlük kararlara dönüştüren kişisel bir yaşam asistanıdır. Gerçek hava verisini; kullanıcının planı, sıcaklık hassasiyeti, stil tercihi ve kendi gardırobuyla birleştirir.
 
-Mimari ayrıntıları için [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Uygulama API anahtarı veya hesap istemez. Hava verileri Open-Meteo'dan alınır; planlar, tercihler, favoriler ve gardırop yalnızca cihazda saklanır.
 
-1. gün değerlendirme maddeleri ve çalıştırma adımları için [docs/DAY1-CHECKLIST.md](docs/DAY1-CHECKLIST.md).
+## Ürün deneyimi
 
-**Teknoloji:** Kotlin · Jetpack Compose (Material 3) · ViewModel + StateFlow · Coroutines · Retrofit + Gson · Navigation Compose
+<p align="center">
+  <img src="docs/screenshots/home.png" width="30%" alt="wearly ana ekran" />
+  <img src="docs/screenshots/forecast.png" width="30%" alt="wearly gerçek hava tahmini ve Comfort Score" />
+  <img src="docs/screenshots/style-assistant.png" width="30%" alt="Wearly Look kombin önerisi" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/my-day.png" width="30%" alt="My Day plan ekleme" />
+  <img src="docs/screenshots/settings.png" width="30%" alt="wearly kişiselleştirme ayarları" />
+</p>
 
 ## Öne çıkan özellikler
 
-- Hava durumuna göre renk değiştiren modern Material 3 arayüz ve koyu tema
-- Dünya genelinde şehir arama ve hızlı şehir kısayolları
-- Türkiye'nin 81 ili için il merkezi veya bağlı ilçe seçimi
-- Anlık sıcaklık, hissedilen sıcaklık, nem ve rüzgâr bilgisi
-- Önümüzdeki 24 saat ve 7 günlük sıcaklık aralığı tahmini
-- Gün doğumu, gün batımı ve UV indeksi
-- Giysi, yağmur, rüzgâr ve güneş korunma önerileri
-- Doğal dilli gün özeti ve en uygun dışarı çıkma aralığı
-- Serbest metin ve hazır sorularla çalışan hava duyarlı Stil Asistanı
-- Sistem/açık/koyu tema ve kalıcı kullanıcı tercihleri
-- Celsius/Fahrenheit geçişi ve sistem paylaşım menüsü
-- Yükleniyor, başarılı, boş ve hata durumları için ayrı kullanıcı deneyimi
-- TalkBack açıklamaları, ölçeklenebilir tipografi ve ekran döndürmede state koruması
+- **Gerçek ve küresel hava:** Dünya genelinde şehir arama, Türkiye'nin 81 ili ve il seçildikten sonra bağlı ilçeler.
+- **Ayrıntılı tahmin:** Anlık ve hissedilen sıcaklık, nem, rüzgâr, yağış olasılığı, UV, gün doğumu/batımı, 24 saat ve 7 gün.
+- **Wearly Comfort Score:** Sıcaklık, yağış, rüzgâr, nem ve UV'yi açıklanabilir bir 0–100 puana dönüştürür.
+- **Planın için en iyi zaman:** Yürüyüş, spor, kahve veya yolculuk için gerçek saatlik tahminden en uygun iki saatlik aralığı seçer.
+- **Wearly Look:** Planı doğal dille alır; üst, alt, dış katman, ayakkabı, aksesuar, renk paleti ve hava korumasını ayrı ayrı açıklar.
+- **Kişisel öneri motoru:** Günlük/zarif/sportif/minimal/ofis stili, üşüme-ısınma hassasiyeti ve konfor-şıklık önceliğini öneriye uygular.
+- **My Wardrobe:** Kullanıcı kendi gerçek kıyafetlerini ekler, düzenler ve siler. “Dolabımdan” istendiğinde sistem yalnızca kayıtlı parçaları kullanır; olmayan ürünü uydurmaz.
+- **My Day:** Tarih, saat, konum, etkinlik, giyim beklentisi ve not içeren planlar cihazda kalıcı olarak eklenebilir, düzenlenebilir ve silinebilir.
+- **Favoriler ve ayarlar:** Şehir favorileri, °C/°F, sistem/açık/koyu tema ve kalıcı kişiselleştirme tercihleri.
+- **Günlük koruma:** Şemsiye, katman, rüzgâr ve UV seviyesine göre SPF yenileme önerileri.
 
-## Mimari — üç katman
+> Wearly Look bir bulut LLM'i gibi davranıyormuş izlenimi vermez. Mevcut sürüm, gerçek tahmin + kullanıcı tercihleri + gardırop verisiyle çalışan deterministik ve test edilebilir bir öneri motorudur. Böylece gizli API anahtarı, sahte sunucu yanıtı veya uydurulmuş gardırop verisi yoktur.
 
-*UI görünümü çizer, ViewModel state'i yönetir, Repository veriye erişir.*
+## Mimari
 
-```
-UI (Composable)  →  ViewModel (StateFlow)  →  Repository (suspend)  →  Retrofit → Open-Meteo
-```
+```text
+Compose UI
+   ↓ state / events
+ViewModel + StateFlow
+   ↓ suspend calls
+Repository
+   ↓
+Retrofit + Gson → Open-Meteo / ilçe servisi
 
-```
-com.kampplus.hava
-├── MainActivity.kt            Uygulamanın kapısı
-├── model/                     Veri neye benzer?
-│   ├── City.kt                City + CitySearchResponse
-│   ├── Forecast.kt            Forecast + Current/Hourly/Daily
-│   └── WeatherCondition.kt    WMO kodu → emoji + Türkçe etiket
-├── data/                      Veri nereden gelir?
-│   ├── ApiClient.kt           object + Retrofit kurulumu
-│   ├── CityApi.kt             @GET v1/search
-│   ├── ForecastApi.kt         @GET v1/forecast
-│   ├── ForecastResponse.kt    DTO + sütun→satır çevrimi
-│   ├── CityRepository.kt      suspend search()
-│   └── WeatherRepository.kt   suspend getForecast()
-└── ui/                        Ne çizilir, ne zaman değişir?
-    ├── LoadState.kt           Loading / Success / Empty / Error
-    ├── HavaNavHost.kt         iki ekran arası geçiş
-    ├── city/                  Şehir arama ve Türkiye/dünya seçimi
-    ├── district/              İl → ilçe seçimi
-    ├── forecast/              ForecastScreen · ForecastViewModel
-    ├── style/                 Hava duyarlı sohbet tipi Stil Asistanı
-    ├── component/             ShimmerList · EmptyView · ErrorView
-    └── theme/                 Color · Theme · Type
+Yerel veriler → SharedPreferences + Gson
+  • kullanıcı tercihleri
+  • favori şehirler
+  • My Day planları
+  • My Wardrobe parçaları
 ```
 
-## API — Open-Meteo (anahtar gerekmez)
+Tek `:app` modülünde sade bir `model / data / ui` ayrımı kullanılır. UI ağ çağrısı yapmaz; ViewModel yükleniyor, başarılı, boş ve hata durumlarını yönetir. Ayrıntılar için [mimari belgesi](docs/ARCHITECTURE.md).
 
-| Amaç | Çağrı |
-|---|---|
-| Şehir arama | `https://geocoding-api.open-meteo.com/v1/search?name=Ankara&count=10&language=tr` |
-| Tahmin | `https://api.open-meteo.com/v1/forecast?latitude=..&longitude=..&current=..&hourly=..&daily=..&forecast_days=7&timezone=auto` |
+## Veri kaynakları ve doğruluk
 
-Türkiye ilçe adları ve merkez koordinatları, anahtarsız açık coğrafya uç noktasından il seçildikten sonra alınır. Tahmin her zaman seçilen il veya ilçenin koordinatıyla Open-Meteo'dan istenir.
-
-- Sonuç yoksa arama yanıtında `results` alanı **hiç gelmez** → Boş (Empty) durumu.
-- Tahmin yanıtı **sütun** biçimindedir: `hourly.time[i]` ile `hourly.temperature_2m[i]` aynı saate aittir.
-- `weather_code` WMO standardındadır (0 açık, 61 yağmur, 95 fırtına…); `WeatherCondition.fromWeatherCode` ile görünüme çevrilir.
-- Ücretsiz kullanım ticari olmayan projeler içindir (~10.000 istek/gün).
+- Şehir arama: [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api)
+- Hava tahmini: [Open-Meteo Forecast API](https://open-meteo.com/en/docs)
+- Türkiye ilçe listeleri/koordinatları: projenin `DistrictApi` katmanındaki açık coğrafya servisi
+- Hava kodları: WMO kodları `WeatherCondition.fromWeatherCode` ile tek noktada eşlenir.
+- Tahmin isteğinde `timezone=auto` kullanıldığı için saatler seçilen konumun yerel saatidir.
 
 ## Çalıştırma
 
+Gereksinimler: Android Studio, Android SDK 36 ve JDK 17 veya 21.
+
 ```bash
-./gradlew assembleDebug        # debug APK
-./gradlew testDebugUnitTest    # unit testler
-./gradlew spotlessApply        # ktlint formatı (denetim için spotlessCheck)
-./gradlew assembleRelease      # release APK (R8 açık)
+./gradlew assembleDebug
+./gradlew testDebugUnitTest
+./gradlew lintDebug
+./gradlew spotlessCheck
 ```
 
-Android SDK yolunu `local.properties` içinde `sdk.dir=...` ile veya `ANDROID_HOME` ortam değişkeniyle verin.
+Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
 
-## Checkpoint'ler
+`local.properties` yalnızca yerel Android SDK yolunu içerir ve sürüm kontrolüne alınmaz:
 
-Her ders bloğunun sonunda projenin olması gereken hâli ayrı bir branch'tedir. `cpN` = **Uygulama N+1**.
+```properties
+sdk.dir=/kullaniciya/ozel/Android/sdk/yolu
+```
 
-| Branch | Karşılığı | İçerik |
-|---|---|---|
-| `cp1-baslangic` | — | Boş Empty Activity projesi, "Merhaba Kamp!" |
-| `cp1-bitis` / `cp2-baslangic` | Uygulama 2 | Sabit şehir listesi, `CityCard` + plaka rozeti, `LazyColumn`, tıklamada `Log.d` |
-| `cp2-bitis` / `cp3-baslangic` | Uygulama 3 | Arama kutusu, `rememberSaveable`, filtre, boş durum, `CityViewModel`, `model/data/ui` paketleri |
-| `cp3-bitis` / `cp4-baslangic` | Uygulama 4 | Retrofit + Gson, `ApiClient`, `CityRepository`, dört durum, Shimmer, `try/catch` |
-| `cp4-bitis` (= `main`) | Uygulama 5 | Tahmin ekranı + navigasyon, cila, testler |
+## Demo akışı
 
-Bir bloğu yetiştiremediyseniz kodunuzu `katilimci/<ad>/cpN` branch'ine kaydedip sonraki bloğun başlangıç branch'ine geçin.
+1. Ana ekranda **İstanbul** sonucunu favorilere ekle.
+2. İstanbul'a girip **Kartal** veya il merkezini seç.
+3. Gerçek tahminde **Wearly Comfort Score** ve **Planın için en iyi zaman** kartlarını göster.
+4. **Stil Asistanına sor** → “Şık bir kombin” ile yapılandırılmış Wearly Look üret.
+5. Ayarlardan “Çabuk üşürüm” ve “Şıklık” seçeneklerini değiştirip önerinin kişiselleştiğini göster.
+6. **My Wardrobe**'a bir üst, alt ve ayakkabı ekleyip “Dolabımdan kombin” iste.
+7. **My Day**'e yeni bir plan ekle; düzenle ve sil akışını göster.
 
-`archive/v1-clean-arch` branch'i, projenin önceki Clean Architecture + Hilt + Room sürümünü saklar.
+## Kalite
 
-## Testler
+- 47 birim test: API/JSON eşleme, repository dönüşümleri, ViewModel durumları, hava önerileri, Comfort Score, etkinlik zamanı ve Wearly Look.
+- Spotless/ktlint biçimlendirme.
+- Android lint.
+- Debug ve küçültülmüş release yapılandırması.
+- TalkBack açıklamaları, dinamik tipografi, açık/koyu tema ve ayrı loading/empty/error durumları.
 
-| Test | Neyi korur |
-|---|---|
-| `WeatherConditionTest` | WMO kod → görünüm eşlemesi |
-| `CityApiTest` | Gson `@SerializedName` eşlemesi (sessizce bozulur) |
-| `ForecastApiTest` | Sütun → satır çevrimi (index kayması hata vermez) |
-| `CityViewModelTest` | Dört durum + "Tekrar dene" |
-| `ForecastViewModelTest` | Rota parametreleri + durumlar |
+## Proje bağlamı
 
-## Release imzası
+Bu ürün, Turkcell Bilişim Kampı Android başlangıç reposu üzerine geliştirilmiştir. Ders checkpoint'leri ve eğitim notları korunmuştur; Wearly özellikleri `feature/wearly` dalında ürünleştirilmiştir.
 
-`keystore.properties.example` dosyasını `keystore.properties` olarak kopyalayıp doldurun (repoya girmez). Dosya yoksa release APK debug anahtarıyla imzalanır.
+Geliştirme checkpoint'leri için [Git geçmişi](docs/GIT-HISTORY.md) ve [gün kontrol listesi](docs/DAY1-CHECKLIST.md) belgelerine bakılabilir.

@@ -1,93 +1,113 @@
-# Mimari
+# Wearly mimarisi
 
-Tek `:app` modülü, üç katman: `model/` · `data/` · `ui/`.
+Wearly tek `:app` modülünde, projenin eğitim amacıyla okunabilir kalmasını sağlayan üç ana katman kullanır.
 
-```
-UI (Composable)  →  ViewModel (StateFlow)  →  Repository (suspend)  →  Retrofit → Open-Meteo
-```
+```text
+UI (Jetpack Compose)
+  ├─ Route: ViewModel/state bağlama
+  └─ Screen: stateless görünüm
+             ↓ events / ↑ state
+ViewModel (StateFlow + viewModelScope)
+             ↓ suspend
+Repository
+             ↓
+Retrofit + Gson ──→ Open-Meteo / ilçe servisi
 
-Kurallar:
-
-- **UI internete gitmez.** Composable yalnızca aldığı state'i çizer ve olayları yukarı bildirir.
-- **ViewModel çizim yapmaz.** Renk veya Composable bilmez; yalnızca state üretir.
-- **Repository ekranı bilmez.** Veriyi getirir; nasıl gösterileceği onu ilgilendirmez.
-
-## Neden bu kadar sade?
-
-Proje bilerek küçük tutuldu. Şu yapılar **yoktur**: bağımlılık enjeksiyonu (Hilt),
-UseCase katmanı, `Result` sarmalayıcısı + hata eşleyici zinciri, `DataSource` ara katmanı,
-domain/DTO/UI üçlü model ayrımı, favoriler ve Room.
-
-Bunların hepsi gerçek projelerde yerinde tercihlerdir; ama üç katmanı anlamadan
-eklendiklerinde kodu takip etmeyi zorlaştırırlar. Önce akışı öğren, katmanları
-ihtiyaç doğdukça ekle.
-
-`LoadState<out T>` jenerik tutuldu: iki ekran aynı dört durumu paylaştığı için tip
-bir kez yazıldı.
-
-## Veri akışı
-
-```
-Retrofit → Repository (suspend, withContext(IO)) → ViewModel (try/catch → LoadState)
-         → Route (collectAsStateWithLifecycle) → Screen (stateless) → Composable
+Yerel Store sınıfları ──→ SharedPreferences + Gson
 ```
 
-1. Kullanıcı arama kutusuna yazar → `onQueryChange` → `_query.value` güncellenir.
-2. Enter'a basar → `search()` → `viewModelScope.launch` içinde coroutine başlar.
-3. `_uiState.value = LoadState.Loading` → ekranda Shimmer görünür.
-4. `repository.search(query)` askıya alınır; ana thread serbest kalır.
-5. Cevap gelir → liste boşsa `Empty`, doluysa `Success`; hata olursa `catch` → `Error`.
-6. `collectAsStateWithLifecycle` yeni değeri okur, Compose ekranı yeniden çizer.
+## Katman sınırları
 
-## Hata yönetimi
+- `ui/` yalnızca state çizer ve kullanıcı olaylarını yukarı iletir; doğrudan ağ çağrısı yapmaz.
+- ViewModel'ler ağ isteklerini yaşam döngüsüne bağlı coroutine'lerde çalıştırır ve `LoadState` üretir.
+- Repository arayüzleri veri kaynağını UI'dan ayırır; testlerde sahte implementasyon verilebilir.
+- `model/` API'den bağımsız iş kararlarını barındırır: Comfort Score, etkinlik zamanı, güneş koruması ve Wearly Look burada hesaplanır.
+- `data/` ağ istemcileri ile cihaz içi kalıcı store sınıflarını içerir.
 
-Hata **ViewModel'de** yakalanır ve orada insan diline çevrilir.
-Repository hatayı sarmalamaz, olduğu gibi fırlatır.
+## Paketler
 
-| Ne oldu | Kotlin'de | Kullanıcıya |
-|---|---|---|
-| İnternet yok, zaman aşımı | `IOException` | "İnternet bağlantını kontrol et." |
-| Sunucu 4xx/5xx döndü | `retrofit2.HttpException` | "Sunucu şu an cevap vermiyor." |
-| Beklenmeyen JSON | `JsonSyntaxException` | "Bir şeyler ters gitti. Tekrar dene." |
-| Eksik `current` bloğu | `IllegalStateException` | "Bir şeyler ters gitti. Tekrar dene." |
+```text
+com.kampplus.hava
+├── MainActivity.kt
+├── model/
+│   ├── City.kt, District.kt, Forecast.kt
+│   ├── WeatherCondition.kt, WeatherAdvice.kt
+│   ├── StyleAssistant.kt
+│   ├── DayPlan.kt, WardrobeItem.kt
+│   └── UserSettings.kt
+├── data/
+│   ├── ApiClient.kt, *Api.kt, *Repository.kt
+│   ├── UserPreferences.kt
+│   ├── FavoriteCityStore.kt
+│   ├── DayPlanStore.kt
+│   └── WardrobeStore.kt
+└── ui/
+    ├── HavaNavHost.kt, LoadState.kt
+    ├── city/, district/, forecast/
+    ├── style/, day/, wardrobe/, settings/
+    ├── component/
+    └── theme/
+```
 
-Teknik ayrıntı her zaman `Log.e(TAG, ..., e)` ile Logcat'e yazılır.
+## Ağ veri akışı
 
-## Dört durum
+1. Kullanıcı bir şehir arar veya kayıtlı konumu açar.
+2. Route ekranı olayı ViewModel'e iletir.
+3. ViewModel `viewModelScope` içinde repository çağrısını başlatır.
+4. Repository Retrofit ile isteği gerçekleştirir ve DTO'yu uygulama modeline dönüştürür.
+5. ViewModel `Loading`, `Success`, `Empty` veya `Error` state'i yayınlar.
+6. Compose yalnızca yeni state'i çizer.
 
-`LoadState` `sealed` olduğu için `when` dallarından biri unutulursa derleme hatası alınır.
-Her ekran dört dalın tamamını karşılar:
+Hatalar kullanıcıya sade mesajlarla gösterilir; teknik ayrıntılar Logcat'e yazılır. Ağ katmanı `IOException`, HTTP, bozuk JSON ve eksik veri durumlarını ayrı ayrı ele alır.
 
-| Durum | Liste ekranı | Tahmin ekranı |
-|---|---|---|
-| `Loading` | `ShimmerList` | `CircularProgressIndicator` |
-| `Success` | `LazyColumn` + `CityCard` | Başlık + saatlik + günlük |
-| `Empty` | "Şehir bulunamadı" + öneri | "Bu şehir için tahmin bulunamadı." |
-| `Error` | Mesaj + "Tekrar dene" | Mesaj + "Tekrar dene" |
+## Yerel veri ve gizlilik
 
-## Route / Screen ayrımı
+Hesap veya sunucu tabanlı profil yoktur. Aşağıdaki bilgiler cihazdaki ayrı SharedPreferences dosyalarında Gson JSON olarak tutulur:
 
-Her ekran iki parçadır:
+- sıcaklık, tema ve stil kişiselleştirme ayarları;
+- favori şehirler;
+- My Day planları;
+- My Wardrobe parçaları.
 
-- **`XRoute`** — ViewModel'i edinir, `collectAsStateWithLifecycle` ile state'i toplar.
-- **`XScreen`** — ViewModel tanımaz; aldığı değerleri çizer, olayları yukarı bildirir.
+Store sınıfları veriyi `StateFlow` olarak yayınlar ve ekleme/düzenleme/silme işlemlerinden sonra tek noktadan kalıcılaştırır. Gardırop öneri motoruna yalnızca kullanıcının açıkça kaydettiği parçalar verilir.
 
-Bu ayrım sayesinde ekranlar `@Preview` içinde ve testte elle state verilerek çalıştırılabilir
-(state hoisting — "değer aşağı, olay yukarı").
+## Wearly öneri motoru
+
+Öneri motoru deterministiktir ve ağdaki bir LLM'e bağlı değildir:
+
+```text
+gerçek tahmin
++ plan cümlesindeki amaç
++ stil tercihi
++ sıcaklık hassasiyeti
++ konfor/şıklık önceliği
++ isteğe bağlı gerçek gardırop
+→ yapılandırılmış Wearly Look
+```
+
+Bu karar fonksiyonlarının Android framework bağımlılığı yoktur; doğrudan JVM birim testleriyle doğrulanır. Kullanıcı “dolabımdan” dediğinde gardırop boşsa açıkça bilgi verilir, parça uydurulmaz.
 
 ## Navigasyon
 
-İki rota: `city` (başlangıç) ve `forecast?name=..&subtitle=..&latitude=..&longitude=..`.
+Navigation Compose rotaları:
 
-Parametreler yol parçası yerine sorgu parametresidir; çünkü `subtitle` boş olabilir ve boş
-bir yol parçası rotayı eşleşmez hâle getirir. Değerler `Uri.encode` ile kaçışlanır.
-`ForecastViewModel` parametreleri `SavedStateHandle` üzerinden okur.
+- `city`: ana arama/favori ekranı
+- `district`: Türkiye ilinden il merkezi veya ilçe seçimi
+- `forecast`: gerçek tahmin ve günlük karar kartları
+- `style`: Wearly Look asistanı
+- `my-day`: kalıcı plan CRUD
+- `wardrobe`: kalıcı gardırop CRUD
+- `settings`: birim, tema ve kişiselleştirme
 
-## Genişletme noktaları
+Şehir, koordinat ve alt başlık rota parametreleri `Uri.encode` ile taşınır. ViewModel'ler parametreleri `SavedStateHandle` üzerinden okur.
 
-| Senaryo | Eklenir | Değişir | Dokunulmaz |
-|---|---|---|---|
-| Yeni hava durumu görünümü | `WeatherCondition`'a yeni sabit | `fromWeatherCode` içindeki `when` | Ekranlar, ViewModel'ler |
-| Yeni hava değişkeni (ör. UV) | `CurrentResponse` + `CurrentWeather` alanı (varsayılanlı) | `ForecastApi.CURRENT_FIELDS`, ekran | Repository, ViewModel |
-| Farklı veri kaynağı | Yeni `CityRepository` implementasyonu | ViewModel'in varsayılan parametresi | Ekranlar, model |
-| Sabit şehir listesine dönüş | `CityCatalog` sınıfı | `CityRepository` implementasyonu | Her şey |
+## Kalite yaklaşımı
+
+- İş mantığı için birim testleri
+- Repository ve JSON eşlemeleri için MockWebServer testleri
+- ViewModel state testleri
+- Spotless/ktlint
+- Android lint
+- Manuel emülatör akışı ve Logcat çökme kontrolü
+
+Yeni bir özellik eklenirken önce model/karar fonksiyonu test edilebilir tutulur; UI yalnızca sonucu sunar.
