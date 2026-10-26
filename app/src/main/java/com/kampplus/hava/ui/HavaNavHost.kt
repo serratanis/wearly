@@ -17,11 +17,13 @@ import com.kampplus.hava.model.TemperatureUnit
 import com.kampplus.hava.model.ThemeMode
 import com.kampplus.hava.model.UserSettings
 import com.kampplus.hava.ui.city.CityRoute
+import com.kampplus.hava.ui.compare.CompareRoute
 import com.kampplus.hava.ui.day.MyDayRoute
 import com.kampplus.hava.ui.district.DistrictRoute
 import com.kampplus.hava.ui.district.DistrictViewModel
 import com.kampplus.hava.ui.forecast.ForecastRoute
 import com.kampplus.hava.ui.forecast.ForecastViewModel
+import com.kampplus.hava.ui.onboarding.OnboardingScreen
 import com.kampplus.hava.ui.settings.SettingsScreen
 import com.kampplus.hava.ui.style.StyleAssistantRoute
 import com.kampplus.hava.ui.style.StyleAssistantViewModel
@@ -41,22 +43,40 @@ import com.kampplus.hava.ui.wardrobe.WardrobeRoute
 @Composable
 fun HavaNavHost(
     settings: UserSettings,
+    onboardingCompleted: Boolean,
+    onOnboardingComplete: () -> Unit,
     onTemperatureUnitChange: (TemperatureUnit) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDailyAdviceChange: (Boolean) -> Unit,
     onStylePreferenceChange: (StylePreference) -> Unit,
     onTemperatureSensitivityChange: (TemperatureSensitivity) -> Unit,
     onOutfitPriorityChange: (OutfitPriority) -> Unit,
+    onHomeCityChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
         navController = navController,
-        startDestination = CITY_ROUTE,
+        startDestination = if (onboardingCompleted) CITY_ROUTE else ONBOARDING_ROUTE,
         modifier = modifier
     ) {
+        composable(ONBOARDING_ROUTE) {
+            OnboardingScreen(
+                settings = settings,
+                onStylePreferenceChange = onStylePreferenceChange,
+                onTemperatureSensitivityChange = onTemperatureSensitivityChange,
+                onHomeCityChange = onHomeCityChange,
+                onComplete = {
+                    onOnboardingComplete()
+                    navController.navigate(CITY_ROUTE) {
+                        popUpTo(ONBOARDING_ROUTE) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(CITY_ROUTE) {
             CityRoute(
+                initialCity = settings.homeCity,
                 onCityClick = { city ->
                     navController.navigate(
                         if (city.countryCode == "TR" && !city.isDistrict) districtRoute(city) else forecastRoute(city)
@@ -65,7 +85,14 @@ fun HavaNavHost(
                 onStyleClick = { city -> navController.navigate(styleRoute(city.name, city.latitude, city.longitude)) },
                 onMyDayClick = { navController.navigate(MY_DAY_ROUTE) },
                 onWardrobeClick = { navController.navigate(WARDROBE_ROUTE) },
+                onCompareClick = { navController.navigate(COMPARE_ROUTE) },
                 onSettingsClick = { navController.navigate(SETTINGS_ROUTE) }
+            )
+        }
+        composable(COMPARE_ROUTE) {
+            CompareRoute(
+                unit = settings.temperatureUnit,
+                onBack = { navController.popBackStack() }
             )
         }
         composable(MY_DAY_ROUTE) {
@@ -147,6 +174,8 @@ fun HavaNavHost(
 
 /** Liste ekranının adresi. */
 private const val CITY_ROUTE = "city"
+private const val ONBOARDING_ROUTE = "onboarding"
+private const val COMPARE_ROUTE = "compare"
 private const val SETTINGS_ROUTE = "settings"
 private const val MY_DAY_ROUTE = "my-day"
 private const val WARDROBE_ROUTE = "wardrobe"

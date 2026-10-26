@@ -16,6 +16,8 @@ class UserPreferences(context: Context) {
     private val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
     private val _settings = MutableStateFlow(readSettings())
     val settings: StateFlow<UserSettings> = _settings.asStateFlow()
+    private val _onboardingCompleted = MutableStateFlow(preferences.getBoolean(KEY_ONBOARDING, false))
+    val onboardingCompleted: StateFlow<Boolean> = _onboardingCompleted.asStateFlow()
 
     fun setTemperatureUnit(unit: TemperatureUnit) = update(KEY_TEMPERATURE, unit.name)
 
@@ -32,6 +34,13 @@ class UserPreferences(context: Context) {
 
     fun setOutfitPriority(priority: OutfitPriority) = update(KEY_PRIORITY, priority.name)
 
+    fun setHomeCity(city: String) = update(KEY_HOME_CITY, city)
+
+    fun completeOnboarding() {
+        preferences.edit().putBoolean(KEY_ONBOARDING, true).apply()
+        _onboardingCompleted.value = true
+    }
+
     private fun update(key: String, value: String) {
         preferences.edit().putString(key, value).apply()
         _settings.value = readSettings()
@@ -44,7 +53,8 @@ class UserPreferences(context: Context) {
         stylePreference = preferences.getString(KEY_STYLE, null).toEnumOrDefault(StylePreference.CASUAL),
         temperatureSensitivity = preferences.getString(KEY_SENSITIVITY, null)
             .toEnumOrDefault(TemperatureSensitivity.BALANCED),
-        outfitPriority = preferences.getString(KEY_PRIORITY, null).toEnumOrDefault(OutfitPriority.BALANCED)
+        outfitPriority = preferences.getString(KEY_PRIORITY, null).toEnumOrDefault(OutfitPriority.BALANCED),
+        homeCity = preferences.getString(KEY_HOME_CITY, "İstanbul").orEmpty().ifBlank { "İstanbul" }
     )
 
     private inline fun <reified T : Enum<T>> String?.toEnumOrDefault(default: T): T =
@@ -58,5 +68,7 @@ class UserPreferences(context: Context) {
         const val KEY_STYLE = "style_preference"
         const val KEY_SENSITIVITY = "temperature_sensitivity"
         const val KEY_PRIORITY = "outfit_priority"
+        const val KEY_HOME_CITY = "home_city"
+        const val KEY_ONBOARDING = "onboarding_completed"
     }
 }

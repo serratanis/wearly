@@ -37,5 +37,6 @@ data class UserSettings(
     val dailyAdviceEnabled: Boolean = true,
     val stylePreference: StylePreference = StylePreference.CASUAL,
     val temperatureSensitivity: TemperatureSensitivity = TemperatureSensitivity.BALANCED,
-    val outfitPriority: OutfitPriority = OutfitPriority.BALANCED
+    val outfitPriority: OutfitPriority = OutfitPriority.BALANCED,
+    val homeCity: String = "İstanbul"
 )

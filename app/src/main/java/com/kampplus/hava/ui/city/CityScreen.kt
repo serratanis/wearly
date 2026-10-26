@@ -33,6 +33,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,10 +59,12 @@ import com.kampplus.hava.ui.theme.HavaTheme
 
 @Composable
 fun CityRoute(
+    initialCity: String,
     onCityClick: (City) -> Unit,
     onStyleClick: (City) -> Unit,
     onMyDayClick: () -> Unit,
     onWardrobeClick: () -> Unit,
+    onCompareClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CityViewModel = viewModel()
@@ -72,6 +75,7 @@ fun CityRoute(
     val query by viewModel.query.collectAsStateWithLifecycle()
     val scope by viewModel.scope.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(initialCity) { viewModel.setInitialCity(initialCity) }
 
     CityScreen(
         query = query,
@@ -85,6 +89,7 @@ fun CityRoute(
         onStyleClick = onStyleClick,
         onMyDayClick = onMyDayClick,
         onWardrobeClick = onWardrobeClick,
+        onCompareClick = onCompareClick,
         onFavoriteClick = favoriteStore::toggle,
         onSettingsClick = onSettingsClick,
         modifier = modifier
@@ -104,6 +109,7 @@ fun CityScreen(
     onStyleClick: (City) -> Unit,
     onMyDayClick: () -> Unit,
     onWardrobeClick: () -> Unit,
+    onCompareClick: () -> Unit,
     onFavoriteClick: (City) -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -134,6 +140,7 @@ fun CityScreen(
                         onStyleClick = onStyleClick,
                         onMyDayClick = onMyDayClick,
                         onWardrobeClick = onWardrobeClick,
+                        onCompareClick = onCompareClick,
                         onFavoriteClick = onFavoriteClick,
                         onExplore = {
                             onQueryChange("")
@@ -320,6 +327,7 @@ private fun CityList(
     onStyleClick: (City) -> Unit,
     onMyDayClick: () -> Unit,
     onWardrobeClick: () -> Unit,
+    onCompareClick: () -> Unit,
     onFavoriteClick: (City) -> Unit,
     onExplore: () -> Unit,
     modifier: Modifier = Modifier
@@ -398,6 +406,33 @@ private fun CityList(
                         }
                         Text("→", style = MaterialTheme.typography.titleLarge)
                     }
+                }
+            }
+        }
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .clickable(onClick = onCompareClick),
+                shape = RoundedCornerShape(22.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Text("⚖️", style = MaterialTheme.typography.headlineMedium)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Şehirleri karşılaştır", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            "İki şehrin gerçek havasını ve Comfort Score'unu yan yana gör.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text("→", style = MaterialTheme.typography.titleLarge)
                 }
             }
         }
@@ -516,6 +551,7 @@ private fun CityScreenPreview() {
             onStyleClick = {},
             onMyDayClick = {},
             onWardrobeClick = {},
+            onCompareClick = {},
             onFavoriteClick = {},
             onSettingsClick = {}
         )

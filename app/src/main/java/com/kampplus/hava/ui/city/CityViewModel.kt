@@ -45,6 +45,7 @@ class CityViewModel(
 
     private val _scope = MutableStateFlow(SearchScope.TURKEY)
     val scope: StateFlow<SearchScope> = _scope.asStateFlow()
+    private var initialCityApplied = false
 
     init {
         // Ekran boş açılmasın diye açılışta bir arama yapılır.
@@ -54,6 +55,16 @@ class CityViewModel(
     /** Kullanıcı arama kutusuna her harf yazdığında çağrılır. */
     fun onQueryChange(newQuery: String) {
         _query.value = newQuery
+    }
+
+    fun setInitialCity(city: String) {
+        if (initialCityApplied) return
+        initialCityApplied = true
+        val cleanCity = city.trim()
+        if (cleanCity.isNotEmpty() && cleanCity != _query.value) {
+            _query.value = cleanCity
+            search()
+        }
     }
 
     fun onScopeChange(newScope: SearchScope) {

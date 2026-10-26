@@ -37,15 +37,19 @@ class MainActivity : ComponentActivity() {
         // Süslü parantezin içi Compose dünyasıdır.
         setContent {
             val settings by preferences.settings.collectAsStateWithLifecycle()
+            val onboardingCompleted by preferences.onboardingCompleted.collectAsStateWithLifecycle()
             HavaTheme(themeMode = settings.themeMode) {
                 HavaNavHost(
                     settings = settings,
+                    onboardingCompleted = onboardingCompleted,
+                    onOnboardingComplete = preferences::completeOnboarding,
                     onTemperatureUnitChange = preferences::setTemperatureUnit,
                     onThemeModeChange = preferences::setThemeMode,
                     onDailyAdviceChange = preferences::setDailyAdviceEnabled,
                     onStylePreferenceChange = preferences::setStylePreference,
                     onTemperatureSensitivityChange = preferences::setTemperatureSensitivity,
-                    onOutfitPriorityChange = preferences::setOutfitPriority
+                    onOutfitPriorityChange = preferences::setOutfitPriority,
+                    onHomeCityChange = preferences::setHomeCity
                 )
             }
         }

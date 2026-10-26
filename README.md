@@ -32,6 +32,8 @@ Uygulama API anahtarı veya hesap istemez. Hava verileri Open-Meteo'dan alınır
 ## Öne çıkan özellikler
 
 - **Gerçek ve küresel hava:** Dünya genelinde şehir arama, Türkiye'nin 81 ili ve il seçildikten sonra bağlı ilçeler.
+- **Kişisel başlangıç:** Atlanabilir onboarding; stil, sıcaklık hassasiyeti ve ana şehir tercihlerini cihazda kalıcı saklar.
+- **Şehir karşılaştırma:** İki şehrin gerçek Open-Meteo verisini, hissedilen sıcaklığını, yağışını, rüzgârını ve Comfort Score'unu karşılaştırır.
 - **Ayrıntılı tahmin:** Anlık ve hissedilen sıcaklık, nem, rüzgâr, yağış olasılığı, UV, gün doğumu/batımı, 24 saat ve 7 gün.
 - **Wearly Comfort Score:** Sıcaklık, yağış, rüzgâr, nem ve UV'yi açıklanabilir bir 0–100 puana dönüştürür.
 - **Planın için en iyi zaman:** Yürüyüş, spor, kahve veya yolculuk için gerçek saatlik tahminden en uygun iki saatlik aralığı seçer.
@@ -100,6 +102,7 @@ sdk.dir=/kullaniciya/ozel/Android/sdk/yolu
 5. Ayarlardan “Çabuk üşürüm” ve “Şıklık” seçeneklerini değiştirip önerinin kişiselleştiğini göster.
 6. **My Wardrobe**'a bir üst, alt ve ayakkabı ekleyip “Dolabımdan kombin” iste.
 7. **My Day**'e yeni bir plan ekle; düzenle ve sil akışını göster.
+8. **Şehirleri karşılaştır** ile İstanbul ve Ankara'nın canlı verilerini yan yana göster.
 
 ## Kalite
 
