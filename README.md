@@ -1,85 +1,92 @@
 <div align="center">
+  <img src="docs/branding/wearly-logo-concept.png" width="190" alt="Wearly logo" />
 
-<img src="docs/branding/wearly-logo-concept.png" width="180" alt="Wearly logosu" />
+  # wearly.
+  ### Your weather. Your style. Your day.
 
-# wearly.
+  Gerçek hava verisini kişisel stil ve günlük planlarla birleştiren modern yaşam asistanı.
 
-### Your weather. Your style. Your day.
-
-Hava durumunu keşfet, tarzını oluştur ve gününü sana özel önerilerle planla.
-
-**Kotlin · Jetpack Compose · Material 3 · MVVM · Open-Meteo**
-
+  ![Kotlin](https://img.shields.io/badge/Kotlin-2.1-7F52FF?style=flat-square&logo=kotlin&logoColor=white)
+  ![Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white)
+  ![Android](https://img.shields.io/badge/Android-API_26%2B-3DDC84?style=flat-square&logo=android&logoColor=white)
+  ![MVVM](https://img.shields.io/badge/Architecture-MVVM-00796B?style=flat-square)
+  ![Tests](https://img.shields.io/badge/Tests-47_passing-22C55E?style=flat-square)
 </div>
 
-## Nedir?
+---
 
-wearly., hava tahminini yalnızca derece gösteren bir ekrandan çıkarıp günlük kararlara dönüştüren kişisel bir yaşam asistanıdır. Gerçek hava verisini; kullanıcının planı, sıcaklık hassasiyeti, stil tercihi ve kendi gardırobuyla birleştirir.
+## One app. Three connected decisions.
 
-Uygulama API anahtarı veya hesap istemez. Hava verileri Open-Meteo'dan alınır; planlar, tercihler, favoriler ve gardırop yalnızca cihazda saklanır.
+| Weather | Style | Your Day |
+| :---: | :---: | :---: |
+| Dünya genelinde gerçek tahmin, 81 il ve ilçeler | Hava, tercih ve gardıroba göre Wearly Look | Plan, en iyi saat ve Android takvim akışı |
 
-## Ürün deneyimi
+Wearly yalnızca sıcaklığı göstermez. **Ne zaman çıkmalıyım? Ne giymeliyim? Günümü nasıl planlamalıyım?** sorularını tek deneyimde yanıtlar.
 
-<p align="center">
-  <img src="docs/screenshots/home.png" width="30%" alt="wearly ana ekran" />
-  <img src="docs/screenshots/forecast.png" width="30%" alt="wearly gerçek hava tahmini ve Comfort Score" />
-  <img src="docs/screenshots/style-assistant.png" width="30%" alt="Wearly Look kombin önerisi" />
-</p>
+## Product experience
 
-<p align="center">
-  <img src="docs/screenshots/my-day.png" width="30%" alt="My Day plan ekleme" />
-  <img src="docs/screenshots/settings.png" width="30%" alt="wearly kişiselleştirme ayarları" />
-</p>
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/screenshots/home.png" width="100%" alt="Wearly home" /><br/><sub><b>Home</b> · global discovery</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/forecast.png" width="100%" alt="Weather" /><br/><sub><b>Weather</b> · forecast & Comfort Score</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/style-assistant.png" width="100%" alt="Wearly Look assistant" /><br/><sub><b>Wearly Look + Assistant</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/wardrobe.png" width="100%" alt="My Wardrobe" /><br/><sub><b>My Wardrobe</b> · real pieces</sub></td>
+    <td align="center"><img src="docs/screenshots/my-day.png" width="100%" alt="My Day" /><br/><sub><b>My Day</b> · plans & calendar</sub></td>
+    <td align="center"><img src="docs/screenshots/compare.png" width="100%" alt="City comparison" /><br/><sub><b>Compare</b> · live city data</sub></td>
+  </tr>
+</table>
 
-## Öne çıkan özellikler
+<details>
+  <summary><b>Personalization settings</b></summary><br/>
+  <p align="center"><img src="docs/screenshots/settings.png" width="32%" alt="Settings" /></p>
+</details>
 
-- **Gerçek ve küresel hava:** Dünya genelinde şehir arama, Türkiye'nin 81 ili ve il seçildikten sonra bağlı ilçeler.
-- **Kişisel başlangıç:** Atlanabilir onboarding; stil, sıcaklık hassasiyeti ve ana şehir tercihlerini cihazda kalıcı saklar.
-- **Şehir karşılaştırma:** İki şehrin gerçek Open-Meteo verisini, hissedilen sıcaklığını, yağışını, rüzgârını ve Comfort Score'unu karşılaştırır.
-- **Ayrıntılı tahmin:** Anlık ve hissedilen sıcaklık, nem, rüzgâr, yağış olasılığı, UV, gün doğumu/batımı, 24 saat ve 7 gün.
-- **Wearly Comfort Score:** Sıcaklık, yağış, rüzgâr, nem ve UV'yi açıklanabilir bir 0–100 puana dönüştürür.
-- **Planın için en iyi zaman:** Yürüyüş, spor, kahve veya yolculuk için gerçek saatlik tahminden en uygun iki saatlik aralığı seçer.
-- **Wearly Look:** Planı doğal dille alır; üst, alt, dış katman, ayakkabı, aksesuar, renk paleti ve hava korumasını ayrı ayrı açıklar.
-- **Kişisel öneri motoru:** Günlük/zarif/sportif/minimal/ofis stili, üşüme-ısınma hassasiyeti ve konfor-şıklık önceliğini öneriye uygular.
-- **My Wardrobe:** Kullanıcı kendi gerçek kıyafetlerini ekler, düzenler ve siler; galeriden seçilen fotoğraf uygulamanın özel alanına kalıcı kopyalanır. “Dolabımdan” istendiğinde sistem yalnızca kayıtlı parçaları kullanır.
-- **My Day + Android Takvim:** Tarih, saat, konum, etkinlik, giyim beklentisi ve not içeren planlar cihazda saklanır; tek dokunuşla Android takvim uygulamasına aktarılır.
-- **Favoriler ve ayarlar:** Şehir favorileri, °C/°F, sistem/açık/koyu tema ve kalıcı kişiselleştirme tercihleri.
-- **Günlük koruma:** Şemsiye, katman, rüzgâr ve UV seviyesine göre SPF yenileme önerileri.
+## Why Wearly?
 
-> Wearly Look bir bulut LLM'i gibi davranıyormuş izlenimi vermez. Mevcut sürüm, gerçek tahmin + kullanıcı tercihleri + gardırop verisiyle çalışan deterministik ve test edilebilir bir öneri motorudur. Böylece gizli API anahtarı, sahte sunucu yanıtı veya uydurulmuş gardırop verisi yoktur.
+- **Real global weather:** Open-Meteo ile dünya şehirleri; Türkiye'nin 81 ili ve ilçeleri.
+- **Wearly Comfort Score:** Sıcaklık, yağış, rüzgâr, nem ve UV'den açıklanabilir 0–100 puan.
+- **Best time:** Saatlik tahminden yürüyüş, spor, kahve veya yolculuk için en dengeli aralık.
+- **Wearly Look:** Plan, stil, sıcaklık hassasiyeti ve şıklık/konfor önceliğinden kişisel kombin.
+- **My Wardrobe:** Kıyafet yönetimi ve galeriden kalıcı fotoğraf; öneriler kayıtlı parçalara sadık kalır.
+- **My Day:** Konum ve giyim beklentili planlar; Android Calendar Intent ile takvime aktarım.
+- **Personal by default:** Onboarding, favoriler, °C/°F, açık/koyu/sistem teması.
+- **Actionable protection:** Yağmur, katman, rüzgâr ve UV seviyesine göre SPF önerileri.
 
-## Mimari
+> Wearly Look; gerçek tahmin, kullanıcı tercihleri ve gardırop verisiyle çalışan deterministik ve test edilebilir bir öneri motorudur. Gizli API anahtarı veya uydurulmuş gardırop verisi kullanmaz.
+
+## Technology & architecture
+
+| Layer | Technology |
+| --- | --- |
+| UI | Kotlin, Jetpack Compose, Material 3 |
+| State | ViewModel, StateFlow, Coroutines |
+| Data | Repository, Retrofit, Gson, Open-Meteo |
+| Local | SharedPreferences, app-private photo storage |
+| Quality | JUnit, MockWebServer, Spotless, Android Lint |
 
 ```text
-Compose UI
-   ↓ state / events
-ViewModel + StateFlow
-   ↓ suspend calls
-Repository
-   ↓
-Retrofit + Gson → Open-Meteo / ilçe servisi
-
-Yerel veriler → SharedPreferences + Gson
-  • kullanıcı tercihleri
-  • favori şehirler
-  • My Day planları
-  • My Wardrobe parçaları
-  • Uygulama özel alanındaki gardırop fotoğrafları
+Compose UI → ViewModel + StateFlow → Repository → Retrofit → Open-Meteo
+                         ↘ preferences, plans, wardrobe and photos
 ```
 
-Tek `:app` modülünde sade bir `model / data / ui` ayrımı kullanılır. UI ağ çağrısı yapmaz; ViewModel yükleniyor, başarılı, boş ve hata durumlarını yönetir. Ayrıntılar için [mimari belgesi](docs/ARCHITECTURE.md).
+Detaylar: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
-## Veri kaynakları ve doğruluk
+## Installation
 
-- Şehir arama: [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api)
-- Hava tahmini: [Open-Meteo Forecast API](https://open-meteo.com/en/docs)
-- Türkiye ilçe listeleri/koordinatları: projenin `DistrictApi` katmanındaki açık coğrafya servisi
-- Hava kodları: WMO kodları `WeatherCondition.fromWeatherCode` ile tek noktada eşlenir.
-- Tahmin isteğinde `timezone=auto` kullanıldığı için saatler seçilen konumun yerel saatidir.
+Gereksinimler: Android Studio, Android SDK 36, JDK 17 veya 21.
 
-## Çalıştırma
+```bash
+git clone https://github.com/serratanis/wearly.git
+cd wearly
+```
 
-Gereksinimler: Android Studio, Android SDK 36 ve JDK 17 veya 21.
+`local.properties`:
+
+```properties
+sdk.dir=/your/local/Android/sdk
+```
 
 ```bash
 ./gradlew assembleDebug
@@ -90,33 +97,25 @@ Gereksinimler: Android Studio, Android SDK 36 ve JDK 17 veya 21.
 
 Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
 
-`local.properties` yalnızca yerel Android SDK yolunu içerir ve sürüm kontrolüne alınmaz:
+## 90-second demo
 
-```properties
-sdk.dir=/kullaniciya/ozel/Android/sdk/yolu
-```
+1. İstanbul veya Kartal ile gerçek tahmini aç.
+2. Comfort Score ve planın için en iyi zamanı göster.
+3. Wearly Look'a “Bugün şık olmam lazım” diye sor.
+4. My Wardrobe'a fotoğraflı bir parça ekle.
+5. My Day planını Android takvimine aktar.
+6. İstanbul ve Ankara'yı canlı verilerle karşılaştır.
 
-## Demo akışı
+## Quality & privacy
 
-1. Ana ekranda **İstanbul** sonucunu favorilere ekle.
-2. İstanbul'a girip **Kartal** veya il merkezini seç.
-3. Gerçek tahminde **Wearly Comfort Score** ve **Planın için en iyi zaman** kartlarını göster.
-4. **Stil Asistanına sor** → “Şık bir kombin” ile yapılandırılmış Wearly Look üret.
-5. Ayarlardan “Çabuk üşürüm” ve “Şıklık” seçeneklerini değiştirip önerinin kişiselleştiğini göster.
-6. **My Wardrobe**'a galeriden fotoğraflı bir parça ekleyip “Dolabımdan kombin” iste.
-7. **My Day**'e yeni bir plan ekle ve **Takvim** ile Android takvimine aktar.
-8. **Şehirleri karşılaştır** ile İstanbul ve Ankara'nın canlı verilerini yan yana göster.
+- **47 unit tests**: API eşleme, repository, ViewModel, öneri, Comfort Score ve Wearly Look.
+- Loading, empty, error ve retry durumları; TalkBack açıklamaları.
+- API anahtarı ve hesap gerekmez.
+- Tercihler, planlar, sohbetler, gardırop ve fotoğraflar cihazda tutulur.
 
-## Kalite
+---
 
-- 47 birim test: API/JSON eşleme, repository dönüşümleri, ViewModel durumları, hava önerileri, Comfort Score, etkinlik zamanı ve Wearly Look.
-- Spotless/ktlint biçimlendirme.
-- Android lint.
-- Debug ve küçültülmüş release yapılandırması.
-- TalkBack açıklamaları, dinamik tipografi, açık/koyu tema ve ayrı loading/empty/error durumları.
-
-## Proje bağlamı
-
-Bu ürün, Turkcell Bilişim Kampı Android başlangıç reposu üzerine geliştirilmiştir. Ders checkpoint'leri ve eğitim notları korunmuştur; Wearly özellikleri `feature/wearly` dalında ürünleştirilmiştir.
-
-Geliştirme checkpoint'leri için [Git geçmişi](docs/GIT-HISTORY.md) ve [gün kontrol listesi](docs/DAY1-CHECKLIST.md) belgelerine bakılabilir.
+<div align="center">
+  <b>Built for Turkcell Bilişim Kampı</b><br/>
+  <sub>Weather that understands your style and your day.</sub>
+</div>
