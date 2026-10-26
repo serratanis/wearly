@@ -1,5 +1,8 @@
 package com.kampplus.hava.ui.day
 
+import android.content.Context
+import android.content.Intent
+import android.provider.CalendarContract
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,6 +49,7 @@ import com.kampplus.hava.data.DayPlanStore
 import com.kampplus.hava.model.DayPlan
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -53,7 +57,14 @@ fun MyDayRoute(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val store = remember(context) { DayPlanStore(context.applicationContext) }
     val plans by store.plans.collectAsStateWithLifecycle()
-    MyDayScreen(plans = plans, onSave = store::upsert, onDelete = store::delete, onBack = onBack, modifier = modifier)
+    MyDayScreen(
+        plans = plans,
+        onSave = store::upsert,
+        onDelete = store::delete,
+        onAddToCalendar = { addToCalendar(context, it) },
+        onBack = onBack,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +73,7 @@ private fun MyDayScreen(
     plans: List<DayPlan>,
     onSave: (DayPlan) -> Unit,
     onDelete: (String) -> Unit,
+    onAddToCalendar: (DayPlan) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -131,6 +143,7 @@ private fun MyDayScreen(
                             editedPlan = plan
                             showEditor = true
                         },
+                        onAddToCalendar = { onAddToCalendar(plan) },
                         onDelete = { onDelete(plan.id) }
                     )
                 }
@@ -151,7 +164,7 @@ private fun MyDayScreen(
 }
 
 @Composable
-private fun PlanCard(plan: DayPlan, onClick: () -> Unit, onDelete: () -> Unit) {
+private fun PlanCard(plan: DayPlan, onClick: () -> Unit, onAddToCalendar: () -> Unit, onDelete: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -179,6 +192,7 @@ private fun PlanCard(plan: DayPlan, onClick: () -> Unit, onDelete: () -> Unit) {
                     Text("Stil: ${plan.dressExpectation}", style = MaterialTheme.typography.labelMedium)
                 }
             }
+            TextButton(onClick = onAddToCalendar) { Text("Takvim") }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, contentDescription = "Planı sil")
             }
@@ -264,3 +278,27 @@ private fun PlanEditorDialog(plan: DayPlan?, onDismiss: () -> Unit, onSave: (Day
 private val EVENT_TYPES = listOf("Günlük", "Okul", "İş", "Buluşma")
 private val DATE_PATTERN = Regex("\\d{4}-\\d{2}-\\d{2}")
 private val TIME_PATTERN = Regex("\\d{2}:\\d{2}")
+
+private fun addToCalendar(context: Context, plan: DayPlan) {
+    val start = runCatching {
+        LocalDate.parse(plan.date)
+            .atTime(LocalTime.parse(plan.time))
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+    }.getOrNull() ?: return
+    val description = buildList {
+        if (plan.eventType.isNotBlank()) add("Tür: ${plan.eventType}")
+        if (plan.dressExpectation.isNotBlank()) add("Giyim: ${plan.dressExpectation}")
+        if (plan.note.isNotBlank()) add(plan.note)
+        add("Wearly ile planlandı.")
+    }.joinToString("\n")
+    val intent = Intent(Intent.ACTION_INSERT).setData(CalendarContract.Events.CONTENT_URI).apply {
+        putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, start)
+        putExtra(CalendarContract.EXTRA_EVENT_END_TIME, start + 60 * 60 * 1000L)
+        putExtra(CalendarContract.Events.TITLE, plan.title)
+        putExtra(CalendarContract.Events.EVENT_LOCATION, plan.location)
+        putExtra(CalendarContract.Events.DESCRIPTION, description)
+    }
+    runCatching { context.startActivity(intent) }
+}

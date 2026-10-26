@@ -8,5 +8,6 @@ data class WardrobeItem(
     val season: String,
     val style: String,
     val purpose: String = "",
-    val note: String = ""
+    val note: String = "",
+    val imageFileName: String = ""
 )

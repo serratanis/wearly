@@ -1,5 +1,9 @@
 package com.kampplus.hava.ui.wardrobe
 
+import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,8 +14,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,6 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,7 +59,7 @@ fun WardrobeRoute(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val store = remember(context) { WardrobeStore(context.applicationContext) }
     val items by store.items.collectAsStateWithLifecycle()
-    WardrobeScreen(items, store::upsert, store::delete, onBack, modifier)
+    WardrobeScreen(items, store::upsert, store::delete, store::importPhoto, onBack, modifier)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +68,7 @@ private fun WardrobeScreen(
     items: List<WardrobeItem>,
     onSave: (WardrobeItem) -> Unit,
     onDelete: (String) -> Unit,
+    onImportPhoto: (android.net.Uri) -> String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -127,6 +137,7 @@ private fun WardrobeScreen(
     if (showEditor) {
         WardrobeEditorDialog(
             item = editedItem,
+            onImportPhoto = onImportPhoto,
             onDismiss = { showEditor = false },
             onSave = {
                 onSave(it)
@@ -138,6 +149,12 @@ private fun WardrobeScreen(
 
 @Composable
 private fun WardrobeCard(item: WardrobeItem, onClick: () -> Unit, onDelete: () -> Unit) {
+    val context = LocalContext.current
+    val bitmap = remember(item.imageFileName) {
+        item.imageFileName.takeIf(String::isNotBlank)?.let { fileName ->
+            BitmapFactory.decodeFile(context.filesDir.resolve("wardrobe_photos").resolve(fileName).absolutePath)
+        }
+    }
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(22.dp),
@@ -148,7 +165,16 @@ private fun WardrobeCard(item: WardrobeItem, onClick: () -> Unit, onDelete: () -
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text(categoryIcon(item.category), style = MaterialTheme.typography.headlineMedium)
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "${item.name} fotoğrafı",
+                    modifier = Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Text(categoryIcon(item.category), style = MaterialTheme.typography.headlineMedium)
+            }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(item.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
@@ -165,7 +191,13 @@ private fun WardrobeCard(item: WardrobeItem, onClick: () -> Unit, onDelete: () -
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun WardrobeEditorDialog(item: WardrobeItem?, onDismiss: () -> Unit, onSave: (WardrobeItem) -> Unit) {
+private fun WardrobeEditorDialog(
+    item: WardrobeItem?,
+    onImportPhoto: (android.net.Uri) -> String?,
+    onDismiss: () -> Unit,
+    onSave: (WardrobeItem) -> Unit
+) {
+    val context = LocalContext.current
     var name by remember(item) { mutableStateOf(item?.name.orEmpty()) }
     var category by remember(item) { mutableStateOf(item?.category ?: CATEGORIES.first()) }
     var color by remember(item) { mutableStateOf(item?.color.orEmpty()) }
@@ -173,12 +205,47 @@ private fun WardrobeEditorDialog(item: WardrobeItem?, onDismiss: () -> Unit, onS
     var style by remember(item) { mutableStateOf(item?.style ?: STYLES.first()) }
     var purpose by remember(item) { mutableStateOf(item?.purpose.orEmpty()) }
     var note by remember(item) { mutableStateOf(item?.note.orEmpty()) }
+    var imageFileName by remember(item) { mutableStateOf(item?.imageFileName.orEmpty()) }
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let(onImportPhoto)?.let { imageFileName = it }
+    }
+    val preview = remember(imageFileName) {
+        imageFileName.takeIf(String::isNotBlank)?.let { fileName ->
+            BitmapFactory.decodeFile(context.filesDir.resolve("wardrobe_photos").resolve(fileName).absolutePath)
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (item == null) "Kıyafet ekle" else "Kıyafeti düzenle") },
         text = {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        if (preview != null) {
+                            Image(
+                                bitmap = preview.asImageBitmap(),
+                                contentDescription = "Seçilen kıyafet fotoğrafı",
+                                modifier = Modifier.size(72.dp).clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text("📷", style = MaterialTheme.typography.headlineMedium)
+                        }
+                        Column {
+                            TextButton(onClick = { photoPicker.launch("image/*") }) {
+                                Text(if (imageFileName.isBlank()) "Galeriden fotoğraf seç" else "Fotoğrafı değiştir")
+                            }
+                            if (imageFileName.isNotBlank()) {
+                                TextButton(onClick = { imageFileName = "" }) { Text("Fotoğrafı kaldır") }
+                            }
+                        }
+                    }
+                }
                 item { OutlinedTextField(name, { name = it }, label = { Text("Parça adı") }, modifier = Modifier.fillMaxWidth()) }
                 item {
                     Text("Kategori", style = MaterialTheme.typography.labelMedium)
@@ -224,7 +291,8 @@ private fun WardrobeEditorDialog(item: WardrobeItem?, onDismiss: () -> Unit, onS
                             season = season,
                             style = style,
                             purpose = purpose.trim(),
-                            note = note.trim()
+                            note = note.trim(),
+                            imageFileName = imageFileName
                         )
                     )
                 }

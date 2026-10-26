@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/branding/wearly-logo-concept.png" width="180" alt="Wearly logosu" />
+
 # wearly.
 
 ### Your weather. Your style. Your day.
@@ -39,8 +41,8 @@ Uygulama API anahtarı veya hesap istemez. Hava verileri Open-Meteo'dan alınır
 - **Planın için en iyi zaman:** Yürüyüş, spor, kahve veya yolculuk için gerçek saatlik tahminden en uygun iki saatlik aralığı seçer.
 - **Wearly Look:** Planı doğal dille alır; üst, alt, dış katman, ayakkabı, aksesuar, renk paleti ve hava korumasını ayrı ayrı açıklar.
 - **Kişisel öneri motoru:** Günlük/zarif/sportif/minimal/ofis stili, üşüme-ısınma hassasiyeti ve konfor-şıklık önceliğini öneriye uygular.
-- **My Wardrobe:** Kullanıcı kendi gerçek kıyafetlerini ekler, düzenler ve siler. “Dolabımdan” istendiğinde sistem yalnızca kayıtlı parçaları kullanır; olmayan ürünü uydurmaz.
-- **My Day:** Tarih, saat, konum, etkinlik, giyim beklentisi ve not içeren planlar cihazda kalıcı olarak eklenebilir, düzenlenebilir ve silinebilir.
+- **My Wardrobe:** Kullanıcı kendi gerçek kıyafetlerini ekler, düzenler ve siler; galeriden seçilen fotoğraf uygulamanın özel alanına kalıcı kopyalanır. “Dolabımdan” istendiğinde sistem yalnızca kayıtlı parçaları kullanır.
+- **My Day + Android Takvim:** Tarih, saat, konum, etkinlik, giyim beklentisi ve not içeren planlar cihazda saklanır; tek dokunuşla Android takvim uygulamasına aktarılır.
 - **Favoriler ve ayarlar:** Şehir favorileri, °C/°F, sistem/açık/koyu tema ve kalıcı kişiselleştirme tercihleri.
 - **Günlük koruma:** Şemsiye, katman, rüzgâr ve UV seviyesine göre SPF yenileme önerileri.
 
@@ -62,6 +64,7 @@ Yerel veriler → SharedPreferences + Gson
   • favori şehirler
   • My Day planları
   • My Wardrobe parçaları
+  • Uygulama özel alanındaki gardırop fotoğrafları
 ```
 
 Tek `:app` modülünde sade bir `model / data / ui` ayrımı kullanılır. UI ağ çağrısı yapmaz; ViewModel yükleniyor, başarılı, boş ve hata durumlarını yönetir. Ayrıntılar için [mimari belgesi](docs/ARCHITECTURE.md).
@@ -100,8 +103,8 @@ sdk.dir=/kullaniciya/ozel/Android/sdk/yolu
 3. Gerçek tahminde **Wearly Comfort Score** ve **Planın için en iyi zaman** kartlarını göster.
 4. **Stil Asistanına sor** → “Şık bir kombin” ile yapılandırılmış Wearly Look üret.
 5. Ayarlardan “Çabuk üşürüm” ve “Şıklık” seçeneklerini değiştirip önerinin kişiselleştiğini göster.
-6. **My Wardrobe**'a bir üst, alt ve ayakkabı ekleyip “Dolabımdan kombin” iste.
-7. **My Day**'e yeni bir plan ekle; düzenle ve sil akışını göster.
+6. **My Wardrobe**'a galeriden fotoğraflı bir parça ekleyip “Dolabımdan kombin” iste.
+7. **My Day**'e yeni bir plan ekle ve **Takvim** ile Android takvimine aktar.
 8. **Şehirleri karşılaştır** ile İstanbul ve Ankara'nın canlı verilerini yan yana göster.
 
 ## Kalite
